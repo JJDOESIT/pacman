@@ -1,40 +1,29 @@
-LIBS=-lsfml-graphics -lsfml-window -lsfml-system
+CC         :=       g++
+CFLAGS     :=       -Iinclude -std=c++20
+LIBS       :=       -lsfml-graphics -lsfml-window -lsfml-system
 
-pacman: main.o engine.o board.o coin.o occupant_list.o occupant.o wall.o pacman.o draw_manager.o texture_manager.o navigation.o
-	g++ -o pacman main.o engine.o board.o coin.o occupant_list.o occupant.o wall.o pacman.o draw_manager.o texture_manager.o navigation.o $(LIBS)
+SRCDIR     :=       src
 
-main.o: main.cpp
-	g++ -c main.cpp 
+SRCNAMES   :=       main.cpp board.cpp coin.cpp draw_manager.cpp engine.cpp ghost.cpp navigation.cpp occupant_list.cpp occupant.cpp pacman.cpp texture_manager.cpp wall.cpp ai.cpp portal.cpp
+SRCS       :=       $(addprefix src/,$(SRCNAMES))
 
-engine.o: engine.cpp engine.h board.h wall.h pacman.h wall_type.h moves.h
-	g++ -c engine.cpp
+OBJDIR    :=     build
+OBJNAMES  :=     $(SRCNAMES:.cpp=.o)
+OBJS      :=     $(addprefix $(OBJDIR)/,$(OBJNAMES))
 
-board.o: board.h board.cpp occupant_list.h coin.h
-	g++ -c board.cpp
+TARGET    :=     pacman
 
-coin.o: coin.cpp coin.h
-	g++ -c coin.cpp
+all: $(TARGET)
 
-occupant_list.o: occupant_list.cpp occupant_list.h occupant.h
-	g++ -c occupant_list.cpp
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
-occupant.o: occupant.cpp occupant.h
-	g++ -c occupant.cpp
+$(OBJDIR)/main.o : src/main.cpp 
+	$(CC) $(CFLAGS) -c $<  -o $@
 
-wall.o: wall.cpp wall.h
-	g++ -c wall.cpp
-
-pacman.o: pacman.cpp pacman.h
-	g++ -c pacman.cpp
-
-draw_manager.o: draw_manager.cpp draw_manager.h texture_manager.h occupant_list.h wall.h pacman.h wall_type.h moves.h
-	g++ -c draw_manager.cpp
-
-texture_manager.o: texture_manager.cpp texture_manager.h
-	g++ -c texture_manager.cpp
-
-navigation.o: navigation.cpp navigation.h occupant.h
-	g++ -c navigation.cpp
+$(OBJDIR)/%.o : src/%.cpp include/%.h
+	$(CC) $(CFLAGS) -c $<  -o $@
 
 
-
+clean:
+	$(RM) $(TARGET) $(OBJS)
