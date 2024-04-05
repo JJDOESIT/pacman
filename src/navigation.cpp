@@ -126,8 +126,6 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction)
         Occupant *portal = (*board->get_board())[row][col].find_occupant(type::PORTAL);
         int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
-        std::cout << static_cast<Portal *>(portal)->get_link()->get_x_position() + linear_directions[portal->get_direction()][0] << ", " << static_cast<Portal *>(portal)->get_link()->get_y_position() + linear_directions[portal->get_direction()][1] << std::endl;
-
         row = static_cast<Portal *>(portal)->get_link()->get_x_position() + linear_directions[portal->get_direction()][0];
         col = static_cast<Portal *>(portal)->get_link()->get_y_position() + linear_directions[portal->get_direction()][1];
 
@@ -158,5 +156,5 @@ void Navigation::move(Occupant *occupant, Board *board, int direction)
         move_occupant(occupant, board, direction);
     }
 
-    delete moves;
+    delete[] moves;
 }

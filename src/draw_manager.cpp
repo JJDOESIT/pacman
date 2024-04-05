@@ -11,16 +11,8 @@ Draw_Manager::Draw_Manager(sf::RenderWindow &w, int s_width, int s_height, int r
     cell_height = screen_height / rows;
 }
 
-void Draw_Manager::handle_rotation(Occupant *occupant, sf::RectangleShape &cell)
+void Draw_Manager::handle_rotation(Occupant *occupant, sf::RectangleShape &cell, int direction)
 {
-    int direction;
-    if (occupant->get_type() == type::PLAYER)
-    {
-        direction = occupant->get_direction();
-    }
-    else if (occupant->get_type() == type::GHOST)
-    {
-    }
     switch (direction)
     {
     case (moves::UP):
@@ -40,6 +32,19 @@ void Draw_Manager::handle_rotation(Occupant *occupant, sf::RectangleShape &cell)
         cell.setScale(sf::Vector2f(-1, 1));
         break;
     }
+}
+
+// Lerp between two given points and a tick
+float *Draw_Manager::lerp(int x1, int y1, int x2, int y2, float tick)
+{
+    float x = x1 + tick * (x2 - x1);
+    float y = y1 + tick * (y2 - y1);
+
+    float *point = new float[2];
+    point[0] = x;
+    point[1] = y;
+
+    return point;
 }
 
 // Draw the board
@@ -203,21 +208,57 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board)
     }
 }
 
+// Draw pacman in accordence with a given start and end position using linear interpolation
+void Draw_Manager::pacman_animation(Occupant *pacman, int x, int y, int target_x, int target_y, int direction, float tick)
+{
+    float *current_position;
+    current_position = lerp(x, y, target_x, target_y, tick);
+
+    draw_pacman(pacman, current_position[0], current_position[1], direction);
+
+    delete[] current_position;
+}
+
 // Draw pacman
-void Draw_Manager::draw_pacman(Occupant *pacman)
+void Draw_Manager::draw_pacman(Occupant *pacman, float x, float y, int direction)
 {
     sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
-    cell.setPosition(sf::Vector2f(pacman->get_y_position() * cell_width, pacman->get_x_position() * cell_height));
-    cell.setTexture(texture_manager.get_texture("fopm"));
-    handle_rotation(pacman, cell);
+    cell.setPosition(sf::Vector2f(y * cell_width, x * cell_height));
+
+    int state = static_cast<Pacman *>(pacman)->get_animation_state();
+    if (state == pacman_animation_state::OPEN)
+    {
+        cell.setTexture(texture_manager.get_texture("fopm"));
+    }
+    else if (state == pacman_animation_state::HALFWAY)
+    {
+        cell.setTexture(texture_manager.get_texture("hcpm"));
+    }
+    else
+    {
+        cell.setTexture(texture_manager.get_texture("cpm"));
+    }
+
+    handle_rotation(pacman, cell, direction);
     window->draw(cell);
 }
 
+// Draw the ghost's in accordence with a given start and end position using linear interpolation
+void Draw_Manager::ghost_animation(Occupant *ghost, std::string name, float tick)
+{
+    float *current_position;
+    current_position = lerp(ghost->get_x_position(), ghost->get_y_position(), static_cast<Ghost *>(ghost)->get_best_x_tile(), static_cast<Ghost *>(ghost)->get_best_y_tile(), tick);
+
+    draw_ghost(ghost, current_position[0], current_position[1], name);
+
+    delete[] current_position;
+}
+
 // Draw a given ghost
-void Draw_Manager::draw_ghost(Occupant *ghost, std::string name)
+void Draw_Manager::draw_ghost(Occupant *ghost, float x, float y, std::string name)
 {
     sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
-    cell.setPosition(sf::Vector2f(ghost->get_y_position() * cell_width, ghost->get_x_position() * cell_height));
+    cell.setPosition(sf::Vector2f(y * cell_width, x * cell_height));
 
     if (ghost->get_direction() == moves::UP)
     {

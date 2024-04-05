@@ -1,6 +1,6 @@
 #include "occupant.h"
 #include "board.h"
-#include "moves.h"
+#include "enum.h"
 #include "pacman.h"
 #include "ghost.h"
 #include "portal.h"

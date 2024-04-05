@@ -1,5 +1,29 @@
-#ifndef _WALL_TYPE_
-#define _WALL_TYPE_
+#ifndef _ENUM_
+#define _ENUM_
+
+enum ghost_modes
+{
+    SCATTER,
+    CHASE,
+    FRIGHTENED,
+};
+
+enum moves
+{
+    UP,
+    RIGHT,
+    DOWN,
+    LEFT
+};
+
+enum type
+{
+    PLAYER,
+    GHOST,
+    WALL,
+    COIN,
+    PORTAL
+};
 
 enum wall_type
 {
@@ -34,6 +58,13 @@ enum wall_type
     STRAIGHTHORIZONTALTOPSINGLE,
     STRAIGHTHORIZONTALBOTTOMSINGLE,
     FILLED,
+};
+
+enum pacman_animation_state
+{
+    OPEN,
+    HALFWAY,
+    CLOSED
 };
 
 #endif

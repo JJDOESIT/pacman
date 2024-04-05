@@ -136,6 +136,14 @@ Texture_Manager::Texture_Manager()
     texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(0, 0, 16, 16));
     texture_map.insert(std::pair<std::string, sf::Texture>("fopm", texture));
 
+    // Halfway closed pacman
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(16, 0, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("hcpm", texture));
+
+    // Closed pacman
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(32, 0, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("cpm", texture));
+
     // Blinky moving up
     texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(64, 64, 16, 16));
     texture_map.insert(std::pair<std::string, sf::Texture>("blinkyu", texture));

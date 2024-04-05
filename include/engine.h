@@ -2,8 +2,7 @@
 #include "wall.h"
 #include "pacman.h"
 #include "ghost.h"
-#include "wall_type.h"
-#include "moves.h"
+#include "enum.h"
 #include "navigation.h"
 #include "ai.h"
 #include "portal.h"
@@ -36,6 +35,7 @@ public:
     Occupant *get_clyde();
     bool *get_possible_moves(Occupant *occupant);
     void move_occupant(Occupant *occupant, int direction);
+    bool check_collision();
     Board *get_board();
     Navigation *get_navigation();
     AI *get_ai();

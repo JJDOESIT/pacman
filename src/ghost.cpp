@@ -31,9 +31,28 @@ int Ghost::get_target_y_tile()
     return target_tile[1];
 }
 
+// Return the x position of the best move
+int Ghost::get_best_x_tile()
+{
+    return best_move[0];
+}
+
+// Return the y position of the best move
+int Ghost::get_best_y_tile()
+{
+    return best_move[1];
+}
+
 // Set the ghost's target tile
 void Ghost::set_target_tile(int x, int y)
 {
     target_tile[0] = x;
     target_tile[1] = y;
+}
+
+// Set the ghost's best move
+void Ghost::set_best_move(int x, int y)
+{
+    best_move[0] = x;
+    best_move[1] = y;
 }

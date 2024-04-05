@@ -53,9 +53,15 @@ int AI::best_direction(bool moves[], Occupant *occupant, int target_x, int targe
 void AI::scatter(Board *b, Navigation *n, Occupant *occupant)
 {
     bool *moves = n->get_possible_moves(occupant, b);
+
     int target_x = static_cast<Ghost *>(occupant)->get_target_x_tile();
     int target_y = static_cast<Ghost *>(occupant)->get_target_y_tile();
-    n->move(occupant, b, best_direction(moves, occupant, target_x, target_y));
+
+    int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    int direction = best_direction(moves, occupant, target_x, target_y);
+
+    static_cast<Ghost *>(occupant)->set_best_move(occupant->get_x_position() + linear_directions[direction][0], occupant->get_y_position() + linear_directions[direction][1]);
+    occupant->set_direction(direction);
 }
 
 // Handle blinky's chase mode
@@ -67,7 +73,11 @@ void AI::blinky(Board *b, Navigation *n, Occupant *blinky, Occupant *pacman)
     int target_x = static_cast<Pacman *>(pacman)->get_x_position();
     int target_y = static_cast<Pacman *>(pacman)->get_y_position();
 
-    n->move(blinky, b, best_direction(moves, blinky, target_x, target_y));
+    int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    int direction = best_direction(moves, blinky, target_x, target_y);
+
+    static_cast<Ghost *>(blinky)->set_best_move(blinky->get_x_position() + linear_directions[direction][0], blinky->get_y_position() + linear_directions[direction][1]);
+    blinky->set_direction(direction);
 }
 
 // Handle pinky's chase mode
@@ -79,12 +89,16 @@ void AI::pinky(Board *b, Navigation *n, Occupant *pinky, Occupant *pacman)
     int target_y = static_cast<Pacman *>(pacman)->get_y_position();
 
     // Set pinky's target tile to be four spaces ahead of pacman
-    int direction = static_cast<Pacman *>(pacman)->get_direction();
-    int linear_directions[4][2] = {{-4, 0}, {0, 4}, {4, 0}, {0, -4}};
-    target_x += linear_directions[direction][0];
-    target_y += linear_directions[direction][1];
+    int linear_directions_target[4][2] = {{-4, 0}, {0, 4}, {4, 0}, {0, -4}};
+    int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
-    n->move(pinky, b, best_direction(moves, pinky, target_x, target_y));
+    target_x += linear_directions_target[static_cast<Pacman *>(pacman)->get_direction()][0];
+    target_y += linear_directions_target[static_cast<Pacman *>(pacman)->get_direction()][1];
+
+    int direction = best_direction(moves, pinky, target_x, target_y);
+
+    static_cast<Ghost *>(pinky)->set_best_move(pinky->get_x_position() + linear_directions[direction][0], pinky->get_y_position() + linear_directions[direction][1]);
+    pinky->set_direction(direction);
 }
 
 // Handle inky's chase mode
@@ -97,10 +111,10 @@ void AI::inky(Board *b, Navigation *n, Occupant *inky, Occupant *blinky, Occupan
     int target_y = static_cast<Pacman *>(pacman)->get_y_position();
 
     // Find the space two ahead of pacman's current direction
-    int direction = static_cast<Pacman *>(pacman)->get_direction();
-    int linear_directions[4][2] = {{-2, 0}, {0, 2}, {2, 0}, {0, -2}};
-    target_x += linear_directions[direction][0];
-    target_y += linear_directions[direction][1];
+    int linear_directions_target[4][2] = {{-2, 0}, {0, 2}, {2, 0}, {0, -2}};
+    int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    target_x += linear_directions_target[static_cast<Pacman *>(pacman)->get_direction()][0];
+    target_y += linear_directions_target[static_cast<Pacman *>(pacman)->get_direction()][1];
 
     // Calculate the x and y distances between the space two ahead of pacman
     // and blinky
@@ -109,7 +123,10 @@ void AI::inky(Board *b, Navigation *n, Occupant *inky, Occupant *blinky, Occupan
 
     // Set inky to move towards the best route that will bring him closer to his target tile
     // (target tile is double the vector of x_distance and y_distance)
-    n->move(inky, b, best_direction(moves, inky, target_x + x_distance, target_y + y_distance));
+    int direction = best_direction(moves, inky, target_x + x_distance, target_y + y_distance);
+
+    static_cast<Ghost *>(inky)->set_best_move(inky->get_x_position() + linear_directions[direction][0], inky->get_y_position() + linear_directions[direction][1]);
+    inky->set_direction(direction);
 }
 
 // Handle clyde's chase mode

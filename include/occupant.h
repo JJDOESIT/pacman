@@ -1,4 +1,4 @@
-#include "type.h"
+#include "enum.h"
 #include <iostream>
 
 #ifndef _OCCUPANT_

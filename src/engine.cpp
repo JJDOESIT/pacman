@@ -190,7 +190,7 @@ Engine::Engine(std::string map_name)
         else if (row == "p")
         {
             row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-            pacman = new Pacman(current_row, current_col, moves::RIGHT);
+            pacman = new Pacman(current_row, current_col, moves::UP);
             row_vector[current_col].push(pacman);
         }
         // blinky represents blinky
@@ -322,6 +322,12 @@ Occupant *Engine::get_inky()
 Occupant *Engine::get_clyde()
 {
     return clyde;
+}
+
+// Return whether or not pacman has collided with a ghost
+bool Engine::check_collision()
+{
+    return ((*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].find_occupant(type::GHOST));
 }
 
 // Return a pointer to the board instance
