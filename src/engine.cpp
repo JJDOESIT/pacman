@@ -288,10 +288,28 @@ Engine::Engine(std::string map_name)
     }
 
     // Initilize the ghost's target tiles
-    blinky->set_target_tile(-3, board.get_cols() - 3);
-    pinky->set_target_tile(-3, 2);
-    inky->set_target_tile(board.get_rows() + 1, board.get_cols());
-    clyde->set_target_tile(board.get_rows() + 1, 0);
+    if (blinky)
+    {
+        blinky->set_target_tile(-3, board.get_cols() - 3);
+    }
+    if (pinky)
+    {
+        pinky->set_target_tile(-3, 2);
+    }
+    if (inky)
+    {
+        inky->set_target_tile(board.get_rows() + 1, board.get_cols());
+    }
+    if (clyde)
+    {
+        clyde->set_target_tile(board.get_rows() + 1, 0);
+    }
+
+    if (!pacman)
+    {
+        std::cout << "Error: Pacman must be placed on the map..." << std::endl;
+        exit(1);
+    }
 }
 
 // Return a pointer to pacman
@@ -330,6 +348,35 @@ bool Engine::check_collision()
     return ((*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].find_occupant(type::GHOST));
 }
 
+// Reset pacman and ghosts positions
+void Engine::reset_all_positions()
+{
+    // Pacman
+    (*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].pop_specific_occupant(pacman);
+    pacman->set_position(pacman->get_initial_x(), pacman->get_initial_y());
+    (*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].push(pacman);
+
+    // Blinky
+    (*board.get_board())[blinky->get_x_position()][blinky->get_y_position()].pop_specific_occupant(blinky);
+    blinky->set_position(blinky->get_initial_x(), blinky->get_initial_y());
+    (*board.get_board())[blinky->get_x_position()][blinky->get_y_position()].push(blinky);
+
+    // Pinky
+    (*board.get_board())[pinky->get_x_position()][pinky->get_y_position()].pop_specific_occupant(pinky);
+    pinky->set_position(pinky->get_initial_x(), pinky->get_initial_y());
+    (*board.get_board())[pinky->get_x_position()][pinky->get_y_position()].push(pinky);
+
+    // Inky
+    (*board.get_board())[inky->get_x_position()][inky->get_y_position()].pop_specific_occupant(inky);
+    inky->set_position(inky->get_initial_x(), inky->get_initial_y());
+    (*board.get_board())[inky->get_x_position()][inky->get_y_position()].push(inky);
+
+    // Clyde
+    (*board.get_board())[clyde->get_x_position()][clyde->get_y_position()].pop_specific_occupant(clyde);
+    clyde->set_position(clyde->get_initial_x(), clyde->get_initial_y());
+    (*board.get_board())[clyde->get_x_position()][clyde->get_y_position()].push(clyde);
+}
+
 // Return a pointer to the board instance
 Board *Engine::get_board()
 {
@@ -346,4 +393,22 @@ Navigation *Engine::get_navigation()
 AI *Engine::get_ai()
 {
     return &ai;
+}
+
+// Return a pointer to the points instance
+Points *Engine::get_points()
+{
+    return &points;
+}
+
+// Return a pointer to the life manager instance
+Life_Manager *Engine::get_life_manager()
+{
+    return &life_manager;
+}
+
+// Return a pointer to the state manager instance
+State_Manager *Engine::get_state_manager()
+{
+    return &state_manager;
 }

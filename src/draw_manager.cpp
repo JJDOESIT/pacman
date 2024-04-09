@@ -1,14 +1,17 @@
 #include "draw_manager.h"
 
-Draw_Manager::Draw_Manager(sf::RenderWindow &w, int s_width, int s_height, int rows, int cols)
+Draw_Manager::Draw_Manager(sf::RenderWindow &w, sf::RenderTexture &b, sf::RenderTexture &h, int s_width, int b_height, int h_height, int rows, int cols)
 {
     window = &w;
+    body = &b;
+    header = &h;
     screen_width = s_width;
-    screen_height = s_height;
+    body_height = b_height;
+    header_height = h_height;
     nRows = rows;
     nCols = cols;
     cell_width = screen_width / cols;
-    cell_height = screen_height / rows;
+    cell_height = body_height / rows;
 }
 
 void Draw_Manager::handle_rotation(Occupant *occupant, sf::RectangleShape &cell, int direction)
@@ -32,6 +35,36 @@ void Draw_Manager::handle_rotation(Occupant *occupant, sf::RectangleShape &cell,
         cell.setScale(sf::Vector2f(-1, 1));
         break;
     }
+}
+
+void Draw_Manager::draw_score(Points *p)
+{
+    p->stringify();
+    text_manager.set_text(p->get_points_string(), TEXT_HEIGHT, sf::Color::White);
+    sf::Text text = text_manager.get_text();
+    text.setPosition(sf::Vector2f(10, (header_height / 2) - (TEXT_HEIGHT / 2)));
+    header->draw(text);
+}
+
+// Clear the display
+void Draw_Manager::clear_all()
+{
+    window->clear();
+    body->clear();
+    header->clear();
+}
+
+// Draw the display
+void Draw_Manager::draw_all()
+{
+    body->display();
+    header->display();
+    sf::Sprite body_texture(body->getTexture());
+    sf::Sprite header_texture(header->getTexture());
+    body_texture.setPosition(0, header_height);
+    window->draw(body_texture);
+    window->draw(header_texture);
+    window->display();
 }
 
 // Lerp between two given points and a tick
@@ -203,7 +236,7 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board)
             {
                 cell.setTexture(texture_manager.get_texture("f"));
             }
-            window->draw(cell);
+            body->draw(cell);
         }
     }
 }
@@ -240,42 +273,48 @@ void Draw_Manager::draw_pacman(Occupant *pacman, float x, float y, int direction
     }
 
     handle_rotation(pacman, cell, direction);
-    window->draw(cell);
+    body->draw(cell);
 }
 
 // Draw the ghost's in accordence with a given start and end position using linear interpolation
 void Draw_Manager::ghost_animation(Occupant *ghost, std::string name, float tick)
 {
-    float *current_position;
-    current_position = lerp(ghost->get_x_position(), ghost->get_y_position(), static_cast<Ghost *>(ghost)->get_best_x_tile(), static_cast<Ghost *>(ghost)->get_best_y_tile(), tick);
+    if (ghost)
+    {
+        float *current_position;
+        current_position = lerp(ghost->get_x_position(), ghost->get_y_position(), static_cast<Ghost *>(ghost)->get_best_x_tile(), static_cast<Ghost *>(ghost)->get_best_y_tile(), tick);
 
-    draw_ghost(ghost, current_position[0], current_position[1], name);
+        draw_ghost(ghost, current_position[0], current_position[1], name);
 
-    delete[] current_position;
+        delete[] current_position;
+    }
 }
 
 // Draw a given ghost
 void Draw_Manager::draw_ghost(Occupant *ghost, float x, float y, std::string name)
 {
-    sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
-    cell.setPosition(sf::Vector2f(y * cell_width, x * cell_height));
+    if (ghost)
+    {
+        sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
+        cell.setPosition(sf::Vector2f(y * cell_width, x * cell_height));
 
-    if (ghost->get_direction() == moves::UP)
-    {
-        cell.setTexture(texture_manager.get_texture(name + "u"));
-    }
-    else if (ghost->get_direction() == moves::RIGHT)
-    {
-        cell.setTexture(texture_manager.get_texture(name + "r"));
-    }
-    else if (ghost->get_direction() == moves::DOWN)
-    {
-        cell.setTexture(texture_manager.get_texture(name + "d"));
-    }
-    else
-    {
-        cell.setTexture(texture_manager.get_texture(name + "l"));
-    }
+        if (ghost->get_direction() == moves::UP)
+        {
+            cell.setTexture(texture_manager.get_texture(name + "u"));
+        }
+        else if (ghost->get_direction() == moves::RIGHT)
+        {
+            cell.setTexture(texture_manager.get_texture(name + "r"));
+        }
+        else if (ghost->get_direction() == moves::DOWN)
+        {
+            cell.setTexture(texture_manager.get_texture(name + "d"));
+        }
+        else
+        {
+            cell.setTexture(texture_manager.get_texture(name + "l"));
+        }
 
-    window->draw(cell);
+        body->draw(cell);
+    }
 }

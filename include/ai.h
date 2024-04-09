@@ -18,6 +18,8 @@ public:
     void pinky(Board *b, Navigation *n, Occupant *pinky, Occupant *pacman);
     void inky(Board *b, Navigation *n, Occupant *inky, Occupant *blinky, Occupant *pacman);
     void clyde(Board *b, Navigation *n, Occupant *clyde, Occupant *pacman);
+    void all_ai(Board *b, Navigation *n, Occupant *pacman, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde);
+    void scatter_all(Board *b, Navigation *n, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde);
 };
 
 #endif

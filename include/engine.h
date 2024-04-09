@@ -6,6 +6,9 @@
 #include "navigation.h"
 #include "ai.h"
 #include "portal.h"
+#include "points.h"
+#include "life_manager.h"
+#include "state_manager.h"
 
 #include <fstream>
 #include <vector>
@@ -16,14 +19,18 @@
 class Engine
 {
 private:
-    Pacman *pacman;
-    Ghost *blinky;
-    Ghost *pinky;
-    Ghost *inky;
-    Ghost *clyde;
+    Pacman *pacman = nullptr;
+    Ghost *blinky = nullptr;
+    Ghost *pinky = nullptr;
+    Ghost *inky = nullptr;
+    Ghost *clyde = nullptr;
     Board board;
     Navigation navigation;
     AI ai;
+    Points points;
+    Life_Manager life_manager{3};
+    State_Manager state_manager;
+
     std::vector<Portal *> portals;
 
 public:
@@ -33,12 +40,14 @@ public:
     Occupant *get_pinky();
     Occupant *get_inky();
     Occupant *get_clyde();
-    bool *get_possible_moves(Occupant *occupant);
-    void move_occupant(Occupant *occupant, int direction);
     bool check_collision();
+    void reset_all_positions();
     Board *get_board();
     Navigation *get_navigation();
     AI *get_ai();
+    Points *get_points();
+    Life_Manager *get_life_manager();
+    State_Manager *get_state_manager();
 };
 
 #endif

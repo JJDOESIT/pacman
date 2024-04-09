@@ -150,3 +150,45 @@ void AI::clyde(Board *b, Navigation *n, Occupant *clyde, Occupant *pacman)
         blinky(b, n, clyde, pacman);
     }
 }
+
+// Calculate all ghosts AI patterns
+void AI::all_ai(Board *b, Navigation *n, Occupant *pacman, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde)
+{
+    if (blinky && pacman)
+    {
+        AI::blinky(b, n, blinky, pacman);
+    }
+    if (pinky && pacman)
+    {
+        AI::pinky(b, n, pinky, pacman);
+    }
+    if (inky && blinky && pacman)
+    {
+        AI::inky(b, n, inky, blinky, pacman);
+    }
+    if (clyde && pacman)
+    {
+        AI::clyde(b, n, clyde, pacman);
+    }
+}
+
+// Calculate all ghost's scatter patterns
+void AI::scatter_all(Board *b, Navigation *n, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde)
+{
+    if (blinky)
+    {
+        scatter(b, n, blinky);
+    }
+    if (pinky)
+    {
+        scatter(b, n, pinky);
+    }
+    if (inky)
+    {
+        scatter(b, n, inky);
+    }
+    if (clyde)
+    {
+        scatter(b, n, clyde);
+    }
+}

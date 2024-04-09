@@ -5,6 +5,8 @@ Ghost::Ghost(int x, int y, int d)
     Occupant::set_type(type::GHOST);
     Occupant::set_position(x, y);
     Occupant::set_direction(d);
+    initial_position[0] = x;
+    initial_position[1] = y;
 }
 
 // Set the ghost's mode
@@ -17,6 +19,18 @@ void Ghost::set_mode(int m)
 int Ghost::get_mode()
 {
     return mode;
+}
+
+// Return the initial x position of the ghost
+int Ghost::get_initial_x()
+{
+    return initial_position[0];
+}
+
+// Return the initial y position of the ghost
+int Ghost::get_initial_y()
+{
+    return initial_position[1];
 }
 
 // Return the x position of the target tile

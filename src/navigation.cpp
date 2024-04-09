@@ -82,7 +82,7 @@ bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
 }
 
 // Move a player or ghost a given direction
-void Navigation::move_occupant(Occupant *occupant, Board *board, int direction)
+void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, Points *points)
 {
     int row = occupant->get_x_position();
     int col = occupant->get_y_position();
@@ -139,22 +139,49 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction)
     if (occupant->get_type() == type::PLAYER)
     {
         Coin *coin = static_cast<Coin *>((*board->get_board())[row][col].find_occupant(type::COIN));
+        // If a coin is found in the occupant list
         if (coin != nullptr)
         {
-            coin->set_toggled(false);
+            // If the coin has not been eaten yet, toggle it off and increase score by 10
+            if (coin->get_toggled())
+            {
+                coin->set_toggled(false);
+                points->update(10);
+            }
         }
     }
 }
 
 // User interface class to move a given occupant a given direction
-void Navigation::move(Occupant *occupant, Board *board, int direction)
+void Navigation::move(Occupant *occupant, Board *board, int direction, Points *points)
 {
     bool *moves = get_possible_moves(occupant, board);
 
     if (moves[direction])
     {
-        move_occupant(occupant, board, direction);
+        move_occupant(occupant, board, direction, points);
     }
 
     delete[] moves;
+}
+
+// Move all ghost's
+void Navigation::move_all_ghosts(Board *board, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde)
+{
+    if (blinky)
+    {
+        move(blinky, board, blinky->get_direction());
+    }
+    if (pinky)
+    {
+        move(pinky, board, pinky->get_direction());
+    }
+    if (inky)
+    {
+        move(inky, board, inky->get_direction());
+    }
+    if (clyde)
+    {
+        move(clyde, board, clyde->get_direction());
+    }
 }

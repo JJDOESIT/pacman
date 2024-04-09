@@ -7,6 +7,7 @@ class Ghost : public Occupant
 {
 private:
     int mode = 0;
+    int initial_position[2] = {-1, -1};
     int target_tile[2] = {-1, -1};
     int best_move[2] = {-1, -1};
 
@@ -14,6 +15,8 @@ public:
     Ghost(int x, int y, int d);
     void set_mode(int m);
     int get_mode();
+    int get_initial_x();
+    int get_initial_y();
     int get_target_x_tile();
     int get_target_y_tile();
     int get_best_x_tile();
