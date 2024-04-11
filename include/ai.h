@@ -2,6 +2,8 @@
 #include "navigation.h"
 #include "occupant.h"
 #include "ghost.h"
+#include "linear_directions.h"
+#include "state_manager.h"
 
 #include <cmath>
 
@@ -10,16 +12,32 @@
 
 class AI
 {
-public:
+private:
+    Board *b;
+    Navigation *n;
+    Pacman *pacman = nullptr;
+    Occupant *blinky = nullptr;
+    Occupant *pinky = nullptr;
+    Occupant *inky = nullptr;
+    Occupant *clyde = nullptr;
+
+    Occupant *get_ghost(int ghost);
     int euclidean_distance(int x1, int y1, int x2, int y2);
     int best_direction(bool moves[], Occupant *occupant, int target_x, int target_y);
-    void scatter(Board *b, Navigation *n, Occupant *occupant);
-    void blinky(Board *b, Navigation *n, Occupant *blinky, Occupant *pacman);
-    void pinky(Board *b, Navigation *n, Occupant *pinky, Occupant *pacman);
-    void inky(Board *b, Navigation *n, Occupant *inky, Occupant *blinky, Occupant *pacman);
-    void clyde(Board *b, Navigation *n, Occupant *clyde, Occupant *pacman);
-    void all_ai(Board *b, Navigation *n, Occupant *pacman, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde);
-    void scatter_all(Board *b, Navigation *n, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde);
+    void scatter(int ghost);
+    void blinky_ai(int ghost);
+    void pinky_ai(int ghost);
+    void inky_ai(int ghost);
+    void clyde_ai(int ghost);
+    void run(int ghost);
+    void move_in_current_direction(int ghost);
+    void move_to_escape_tile(State_Manager *state_manager, int ghost);
+    void move_based_on_state(State_Manager *state_manager, int ghost);
+    void return_to_start(State_Manager *state_manager, int ghost);
+
+public:
+    AI(Board *b, Navigation *n, Pacman *pacman, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde);
+    void move_all(State_Manager *state_manager);
 };
 
 #endif

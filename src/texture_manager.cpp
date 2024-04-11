@@ -207,6 +207,30 @@ Texture_Manager::Texture_Manager()
     // clyde moving left
     texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(32, 112, 16, 16));
     texture_map.insert(std::pair<std::string, sf::Texture>("clydel", texture));
+
+    // frightened ghost
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(128, 64, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("frightened", texture));
+
+    // ghost eyes up
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(160, 80, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("eyesu", texture));
+
+    // ghost eyes down
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(176, 80, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("eyesd", texture));
+
+    // ghost eyes left
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(144, 80, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("eyesl", texture));
+
+    // ghost eyes right
+    texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(128, 80, 16, 16));
+    texture_map.insert(std::pair<std::string, sf::Texture>("eyesr", texture));
+
+    // power pellet
+    texture.loadFromFile("images/wall_sprite_sheet.png", sf::IntRect(135, 45, 8, 8));
+    texture_map.insert(std::pair<std::string, sf::Texture>("pp", texture));
 }
 
 // Return a pointer to the stored texture in the map

@@ -9,6 +9,7 @@
 #include "points.h"
 #include "life_manager.h"
 #include "state_manager.h"
+#include "power.h"
 
 #include <fstream>
 #include <vector>
@@ -25,11 +26,11 @@ private:
     Ghost *inky = nullptr;
     Ghost *clyde = nullptr;
     Board board;
-    Navigation navigation;
-    AI ai;
+    State_Manager state_manager;
+    Navigation navigation{&state_manager};
+    AI *ai;
     Points points;
     Life_Manager life_manager{3};
-    State_Manager state_manager;
 
     std::vector<Portal *> portals;
 

@@ -7,6 +7,7 @@
 #include "enum.h"
 #include "points.h"
 #include "text_manager.h"
+#include "power.h"
 
 #include <iostream>
 #include <string>
@@ -34,8 +35,10 @@ public:
     void draw_board(std::vector<std::vector<Occupant_List>> *board);
     void pacman_animation(Occupant *pacman, int x, int y, int target_x, int target_y, int direction, float tick);
     void draw_pacman(Occupant *pacman, float x, float y, int direction);
-    void ghost_animation(Occupant *ghost, std::string name, float tick);
+    void ghost_animation(Occupant *ghost, std::string name, float tick, bool frightened, int state);
     void draw_ghost(Occupant *ghost, float x, float y, std::string name);
+    void draw_frightened_ghost(Occupant *ghost, float x, float y);
+    void draw_ghost_eyes(Occupant *ghost, float x, float y);
     void handle_rotation(Occupant *occupant, sf::RectangleShape &cell, int direction);
     void draw_score(Points *p);
     void clear_all();

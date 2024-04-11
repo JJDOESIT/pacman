@@ -1,5 +1,10 @@
 #include "navigation.h"
 
+Navigation::Navigation(State_Manager *state_manager)
+{
+    Navigation::state_manager = state_manager;
+}
+
 // Return a bool array of possible moves the occupant can make
 bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
 {
@@ -48,17 +53,41 @@ bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
         // Check if the ghost can move down
         if (x + 1 < board->get_rows() && occupant->get_direction() != moves::UP)
         {
-            if ((*board->get_board())[x + 1][y].find_occupant(type::WALL) == nullptr)
+            Occupant *wall = (*board->get_board())[x + 1][y].find_occupant(type::WALL);
+            if (wall == nullptr)
             {
                 moves[moves::DOWN] = true;
+            }
+            else if (static_cast<Wall *>(wall)->get_wall_type() == wall_type::GATE)
+            {
+                int state = state_manager->get_ghost_state(static_cast<Ghost *>(occupant)->get_type());
+                if (state == ghost_states::ESCAPING || state == ghost_states::HEADING_BACK)
+                {
+                    if (state_manager->get_ghost_escape_x(static_cast<Ghost *>(occupant)->get_type()) == x + 1 && state_manager->get_ghost_escape_y(static_cast<Ghost *>(occupant)->get_type()) == y)
+                    {
+                        moves[moves::DOWN] = true;
+                    }
+                }
             }
         }
         // Check if the ghost can move up
         if (x - 1 >= 0 && occupant->get_direction() != moves::DOWN)
         {
-            if ((*board->get_board())[x - 1][y].find_occupant(type::WALL) == nullptr)
+            Occupant *wall = (*board->get_board())[x - 1][y].find_occupant(type::WALL);
+            if (wall == nullptr)
             {
                 moves[moves::UP] = true;
+            }
+            else if (static_cast<Wall *>(wall)->get_wall_type() == wall_type::GATE)
+            {
+                int state = state_manager->get_ghost_state(static_cast<Ghost *>(occupant)->get_type());
+                if (state == ghost_states::ESCAPING || state == ghost_states::HEADING_BACK)
+                {
+                    if (state_manager->get_ghost_escape_x(static_cast<Ghost *>(occupant)->get_type()) == x - 1 && state_manager->get_ghost_escape_y(static_cast<Ghost *>(occupant)->get_type()) == y)
+                    {
+                        moves[moves::UP] = true;
+                    }
+                }
             }
         }
         // Check if the ghost can move right
@@ -82,7 +111,7 @@ bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
 }
 
 // Move a player or ghost a given direction
-void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, Points *points)
+void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
 {
     int row = occupant->get_x_position();
     int col = occupant->get_y_position();
@@ -124,10 +153,9 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
     {
 
         Occupant *portal = (*board->get_board())[row][col].find_occupant(type::PORTAL);
-        int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
-        row = static_cast<Portal *>(portal)->get_link()->get_x_position() + linear_directions[portal->get_direction()][0];
-        col = static_cast<Portal *>(portal)->get_link()->get_y_position() + linear_directions[portal->get_direction()][1];
+        row = static_cast<Portal *>(portal)->get_link()->get_x_position() + linear_directions_one[portal->get_direction()][0];
+        col = static_cast<Portal *>(portal)->get_link()->get_y_position() + linear_directions_one[portal->get_direction()][1];
 
         occupant->set_position(row, col);
     }
@@ -135,9 +163,9 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
     // Push the occupant into the new position on the board
     (*board->get_board())[row][col].push(occupant);
 
-    // Determine whether pacman has entered a space with a coin in it (If he has, toggle off the coin)
     if (occupant->get_type() == type::PLAYER)
     {
+        // Determine whether pacman has entered a space with a coin in it (If he has, toggle off the coin)
         Coin *coin = static_cast<Coin *>((*board->get_board())[row][col].find_occupant(type::COIN));
         // If a coin is found in the occupant list
         if (coin != nullptr)
@@ -149,17 +177,31 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
                 points->update(10);
             }
         }
+        // Determine whether pacman has entered a space with a power up in it (If he has, return what type)
+        Power *power = static_cast<Power *>((*board->get_board())[row][col].find_occupant(type::POWER));
+        if (power != nullptr)
+        {
+            if (power->get_toggled())
+            {
+                if (power->get_type() == power_types::POWER_PELLET)
+                {
+                    power->set_toggled(false);
+                    points->update(200);
+                    *powerup = power_types::POWER_PELLET;
+                }
+            }
+        }
     }
 }
 
 // User interface class to move a given occupant a given direction
-void Navigation::move(Occupant *occupant, Board *board, int direction, Points *points)
+void Navigation::move(Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
 {
     bool *moves = get_possible_moves(occupant, board);
 
     if (moves[direction])
     {
-        move_occupant(occupant, board, direction, points);
+        move_occupant(occupant, board, direction, points, powerup);
     }
 
     delete[] moves;

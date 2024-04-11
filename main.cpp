@@ -2,6 +2,7 @@
 #include "draw_manager.h"
 #include "clock.h"
 #include "SFML/Graphics.hpp"
+#include "linear_directions.h"
 
 int main()
 {
@@ -22,27 +23,23 @@ int main()
 
     sf::Event event;
 
+    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::BLINKY, 12, 14);
+    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::PINKY, 12, 14);
+    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::INKY, 12, 14);
+    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::CLYDE, 12, 14);
+
     Clock player_clock(200);
     Clock ghost_clock(300);
     Clock player_animation_clock(100);
 
-    e.get_state_manager()->push(5000, ghost_modes::SCATTER);
-    e.get_state_manager()->push(5000, ghost_modes::CHASE);
+    e.get_state_manager()->push(7000, ghost_modes::SCATTER);
+    e.get_state_manager()->push(20000, ghost_modes::CHASE);
 
     bool is_stopped = false;
     int buffer_direction = e.get_pacman()->get_direction();
     int intended_direction = buffer_direction;
 
-    // If the current ghost mode is scatter, call the scatter AI
-    if (e.get_state_manager()->get_ghost_mode() == ghost_modes::SCATTER)
-    {
-        e.get_ai()->scatter_all(e.get_board(), e.get_navigation(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
-    }
-    // Else if the current ghost mode is case, call the chase AI
-    else if (e.get_state_manager()->get_ghost_mode() == ghost_modes::CHASE)
-    {
-        e.get_ai()->all_ai(e.get_board(), e.get_navigation(), e.get_pacman(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
-    }
+    e.get_ai()->move_all(e.get_state_manager());
 
     while (window.isOpen())
     {
@@ -52,7 +49,7 @@ int main()
         player_clock.update();
         ghost_clock.update();
         player_animation_clock.update();
-        e.get_state_manager()->update_state();
+        e.get_state_manager()->update_mode();
 
         // If pacman has moved over one coin on on the screen (pacman is drawn ahead before he is moved internally)
         if (player_clock.need_restart())
@@ -65,7 +62,12 @@ int main()
             if (moves[intended_direction] && e.get_pacman()->get_direction() == buffer_direction)
             {
                 // Move pacman in the intended direction and set his buffer_direction to face the same way
-                e.get_navigation()->move(e.get_pacman(), e.get_board(), intended_direction, e.get_points());
+                int powerup = -1;
+                e.get_navigation()->move(e.get_pacman(), e.get_board(), intended_direction, e.get_points(), &powerup);
+                if (powerup == power_types::POWER_PELLET)
+                {
+                    e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
+                }
                 buffer_direction = intended_direction;
             }
             // Else if pacman is trying to reverse between cells
@@ -82,7 +84,12 @@ int main()
             else
             {
                 // Move pacman over a tile
-                e.get_navigation()->move(e.get_pacman(), e.get_board(), buffer_direction, e.get_points());
+                int powerup = -1;
+                e.get_navigation()->move(e.get_pacman(), e.get_board(), buffer_direction, e.get_points(), &powerup);
+                if (powerup == power_types::POWER_PELLET)
+                {
+                    e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
+                }
 
                 // Recheck if pacman is able to move his intended direction
                 // Note: This is needed because if pacman moves up a tile, but is now able to turn his intended
@@ -101,6 +108,7 @@ int main()
                 }
                 delete[] moves;
             }
+            delete[] moves;
         }
 
         // Check for collisions
@@ -112,7 +120,21 @@ int main()
         {
             e.get_life_manager()->set_collision(true);
             e.get_life_manager()->decrement();
-            e.reset_all_positions();
+
+            if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
+            {
+                ghost_clock.restart();
+                player_clock.restart();
+                e.reset_all_positions();
+                e.get_state_manager()->set_ghost_state(ghosts_types::BLINKY, ghost_states::ESCAPING);
+                e.get_state_manager()->set_ghost_state(ghosts_types::PINKY, ghost_states::ESCAPING);
+                e.get_state_manager()->set_ghost_state(ghosts_types::INKY, ghost_states::ESCAPING);
+                e.get_state_manager()->set_ghost_state(ghosts_types::CLYDE, ghost_states::ESCAPING);
+            }
+            else
+            {
+                (*(e.get_board()->get_board()))[e.get_pacman()->get_x_position()][e.get_pacman()->get_y_position()].set_state_of_all_ghosts(e.get_state_manager(), ghost_states::HEADING_BACK);
+            }
         }
 
         // If the ghosts have moved one coin over (the ghosts are drawn ahead before they are moved internally)
@@ -125,15 +147,7 @@ int main()
             e.get_navigation()->move_all_ghosts(e.get_board(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
 
             // If the current ghost mode is scatter, call the scatter AI
-            if (e.get_state_manager()->get_ghost_mode() == ghost_modes::SCATTER)
-            {
-                e.get_ai()->scatter_all(e.get_board(), e.get_navigation(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
-            }
-            // Else if the current ghost mode is case, call the chase AI
-            else if (e.get_state_manager()->get_ghost_mode() == ghost_modes::CHASE)
-            {
-                e.get_ai()->all_ai(e.get_board(), e.get_navigation(), e.get_pacman(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
-            }
+            e.get_ai()->move_all(e.get_state_manager());
 
             ghost_clock.restart();
         }
@@ -234,13 +248,39 @@ int main()
 
         d.draw_board(e.get_board()->get_board());
 
-        int linear_directions[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        // If there is no collision, draw lerping animation
+        if (!e.get_life_manager()->get_collision() || e.get_state_manager()->get_ghost_mode() == ghost_modes::FRIGHTENED)
+        {
+            bool frightened;
+            frightened = (e.get_state_manager()->get_ghost_mode() == ghost_modes::FRIGHTENED);
+            d.ghost_animation(e.get_blinky(), "blinky", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::BLINKY));
+            d.ghost_animation(e.get_pinky(), "pinky", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::PINKY));
+            d.ghost_animation(e.get_inky(), "inky", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::INKY));
+            d.ghost_animation(e.get_clyde(), "clyde", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::CLYDE));
+
+            if (e.get_life_manager()->get_collision())
+            {
+                e.get_life_manager()->set_collision(false);
+            }
+        }
+        // Else if there is a collision, reset positions and decrease lives
+        else
+        {
+            d.draw_ghost(e.get_blinky(), e.get_blinky()->get_x_position(), e.get_blinky()->get_y_position(), "blinky");
+            d.draw_ghost(e.get_pinky(), e.get_pinky()->get_x_position(), e.get_pinky()->get_y_position(), "pinky");
+            d.draw_ghost(e.get_inky(), e.get_inky()->get_x_position(), e.get_inky()->get_y_position(), "inky");
+            d.draw_ghost(e.get_clyde(), e.get_clyde()->get_x_position(), e.get_clyde()->get_y_position(), "clyde");
+
+            e.get_ai()->move_all(e.get_state_manager());
+
+            e.get_life_manager()->set_collision(false);
+        }
 
         int x = e.get_pacman()->get_x_position();
         int y = e.get_pacman()->get_y_position();
 
-        int target_x = x + linear_directions[e.get_pacman()->get_direction()][0];
-        int target_y = y + linear_directions[e.get_pacman()->get_direction()][1];
+        int target_x = x + linear_directions_one[e.get_pacman()->get_direction()][0];
+        int target_y = y + linear_directions_one[e.get_pacman()->get_direction()][1];
 
         // If pacman is stopped
         if ((*(e.get_board()->get_board()))[target_x][target_y].find_occupant(type::WALL))
@@ -259,36 +299,6 @@ int main()
         {
             d.pacman_animation(e.get_pacman(), target_x, target_y, x, y, buffer_direction, player_clock.get_tick());
             is_stopped = false;
-        }
-
-        // If there is no collision, draw lerping animation
-        if (!e.get_life_manager()->get_collision())
-        {
-            d.ghost_animation(e.get_blinky(), "blinky", ghost_clock.get_tick());
-            d.ghost_animation(e.get_pinky(), "pinky", ghost_clock.get_tick());
-            d.ghost_animation(e.get_inky(), "inky", ghost_clock.get_tick());
-            d.ghost_animation(e.get_clyde(), "clyde", ghost_clock.get_tick());
-        }
-        // Else if there is a collision, reset positions and decrease lives
-        else
-        {
-            d.draw_ghost(e.get_blinky(), e.get_blinky()->get_x_position(), e.get_blinky()->get_y_position(), "blinky");
-            d.draw_ghost(e.get_pinky(), e.get_pinky()->get_x_position(), e.get_pinky()->get_y_position(), "pinky");
-            d.draw_ghost(e.get_inky(), e.get_inky()->get_x_position(), e.get_inky()->get_y_position(), "inky");
-            d.draw_ghost(e.get_clyde(), e.get_clyde()->get_x_position(), e.get_clyde()->get_y_position(), "clyde");
-
-            // If the current ghost mode is scatter, call the scatter AI
-            if (e.get_state_manager()->get_ghost_mode() == ghost_modes::SCATTER)
-            {
-                e.get_ai()->scatter_all(e.get_board(), e.get_navigation(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
-            }
-            // Else if the current ghost mode is case, call the chase AI
-            else if (e.get_state_manager()->get_ghost_mode() == ghost_modes::CHASE)
-            {
-                e.get_ai()->all_ai(e.get_board(), e.get_navigation(), e.get_pacman(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
-            }
-
-            e.get_life_manager()->set_collision(false);
         }
 
         d.draw_score(e.get_points());

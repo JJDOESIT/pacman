@@ -218,6 +218,10 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board)
                 {
                     cell.setTexture(texture_manager.get_texture("f"));
                 }
+                else if (wall_type == wall_type::GATE)
+                {
+                    cell.setTexture(texture_manager.get_texture("f"));
+                }
             }
             // If the cell is a coin
             else if ((*board)[row][col].find_occupant(type::COIN))
@@ -235,6 +239,25 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board)
             else if ((*board)[row][col].find_occupant(type::PORTAL))
             {
                 cell.setTexture(texture_manager.get_texture("f"));
+            }
+            // Else if the cell is a power up
+            else if ((*board)[row][col].find_occupant(type::POWER))
+            {
+                Power *power = static_cast<Power *>((*board)[row][col].find_occupant(type::POWER));
+
+                // If the power up has not been eaten yet
+                if (power->get_toggled())
+                {
+                    // If the power up is a power pellet
+                    if (power->get_type() == power_types::POWER_PELLET)
+                    {
+                        cell.setTexture(texture_manager.get_texture("pp"));
+                    }
+                }
+                else
+                {
+                    cell.setTexture(texture_manager.get_texture("f"));
+                }
             }
             body->draw(cell);
         }
@@ -277,14 +300,25 @@ void Draw_Manager::draw_pacman(Occupant *pacman, float x, float y, int direction
 }
 
 // Draw the ghost's in accordence with a given start and end position using linear interpolation
-void Draw_Manager::ghost_animation(Occupant *ghost, std::string name, float tick)
+void Draw_Manager::ghost_animation(Occupant *ghost, std::string name, float tick, bool frightened, int state)
 {
     if (ghost)
     {
         float *current_position;
         current_position = lerp(ghost->get_x_position(), ghost->get_y_position(), static_cast<Ghost *>(ghost)->get_best_x_tile(), static_cast<Ghost *>(ghost)->get_best_y_tile(), tick);
 
-        draw_ghost(ghost, current_position[0], current_position[1], name);
+        if (state == ghost_states::HEADING_BACK)
+        {
+            draw_ghost_eyes(ghost, current_position[0], current_position[1]);
+        }
+        else if (frightened)
+        {
+            draw_frightened_ghost(ghost, current_position[0], current_position[1]);
+        }
+        else
+        {
+            draw_ghost(ghost, current_position[0], current_position[1], name);
+        }
 
         delete[] current_position;
     }
@@ -317,4 +351,39 @@ void Draw_Manager::draw_ghost(Occupant *ghost, float x, float y, std::string nam
 
         body->draw(cell);
     }
+}
+
+// Draw a frightened ghost
+void Draw_Manager::draw_frightened_ghost(Occupant *ghost, float x, float y)
+{
+    sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
+    cell.setPosition(sf::Vector2f(y * cell_width, x * cell_height));
+    cell.setTexture(texture_manager.get_texture("frightened"));
+    body->draw(cell);
+}
+
+// Draw ghost eyes
+void Draw_Manager::draw_ghost_eyes(Occupant *ghost, float x, float y)
+{
+    sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
+    cell.setPosition(sf::Vector2f(y * cell_width, x * cell_height));
+
+    if (ghost->get_direction() == moves::UP)
+    {
+        cell.setTexture(texture_manager.get_texture("eyesu"));
+    }
+    else if (ghost->get_direction() == moves::RIGHT)
+    {
+        cell.setTexture(texture_manager.get_texture("eyesr"));
+    }
+    else if (ghost->get_direction() == moves::DOWN)
+    {
+        cell.setTexture(texture_manager.get_texture("eyesd"));
+    }
+    else if (ghost->get_direction() == moves::LEFT)
+    {
+        cell.setTexture(texture_manager.get_texture("eyesl"));
+    }
+
+    body->draw(cell);
 }

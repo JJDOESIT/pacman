@@ -1,6 +1,14 @@
 #ifndef _ENUM_
 #define _ENUM_
 
+enum ghosts_types
+{
+    BLINKY,
+    PINKY,
+    INKY,
+    CLYDE,
+};
+
 enum ghost_modes
 {
     SCATTER,
@@ -22,7 +30,8 @@ enum type
     GHOST,
     WALL,
     COIN,
-    PORTAL
+    PORTAL,
+    POWER,
 };
 
 enum wall_type
@@ -58,6 +67,7 @@ enum wall_type
     STRAIGHTHORIZONTALTOPSINGLE,
     STRAIGHTHORIZONTALBOTTOMSINGLE,
     FILLED,
+    GATE,
 };
 
 enum pacman_animation_state
@@ -65,6 +75,19 @@ enum pacman_animation_state
     OPEN,
     HALFWAY,
     CLOSED
+};
+
+enum power_types
+{
+    POWER_PELLET,
+};
+
+enum ghost_states
+{
+    DISABLED,
+    ESCAPING,
+    HEADING_BACK,
+    FREE,
 };
 
 #endif

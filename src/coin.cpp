@@ -13,7 +13,7 @@ void Coin::set_toggled(bool t)
     toggled = t;
 }
 
-// Return whether the coin is toggled
+// Return whether the coin is toggled or not
 bool Coin::get_toggled()
 {
     return toggled;

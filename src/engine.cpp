@@ -176,6 +176,11 @@ Engine::Engine(std::string map_name)
         {
             row_vector.push_back(Occupant_List(new Wall(current_row, current_col, wall_type::FILLED)));
         }
+        // gate represents a ghost gate
+        else if (row == "gate")
+        {
+            row_vector.push_back(Occupant_List(new Wall(current_row, current_col, wall_type::GATE)));
+        }
         // c represents a coin
         else if (row == "c")
         {
@@ -196,30 +201,36 @@ Engine::Engine(std::string map_name)
         // blinky represents blinky
         else if (row == "blinky")
         {
-            row_vector.push_back(Occupant_List(new Coin(current_row, current_col)));
-            blinky = new Ghost(current_row, current_col, moves::LEFT);
+            row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
+            blinky = new Ghost(current_row, current_col, moves::LEFT, ghosts_types::BLINKY);
             row_vector[current_col].push(blinky);
         }
         // pinky represents pinky
         else if (row == "pinky")
         {
-            row_vector.push_back(Occupant_List(new Coin(current_row, current_col)));
-            pinky = new Ghost(current_row, current_col, moves::RIGHT);
+            row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
+            pinky = new Ghost(current_row, current_col, moves::RIGHT, ghosts_types::PINKY);
             row_vector[current_col].push(pinky);
         }
         // inky represents inky
         else if (row == "inky")
         {
-            row_vector.push_back(Occupant_List(new Coin(current_row, current_col)));
-            inky = new Ghost(current_row, current_col, moves::RIGHT);
+            row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
+            inky = new Ghost(current_row, current_col, moves::UP, ghosts_types::INKY);
             row_vector[current_col].push(inky);
         }
         // clyde represents clyde
         else if (row == "clyde")
         {
-            row_vector.push_back(Occupant_List(new Coin(current_row, current_col)));
-            clyde = new Ghost(current_row, current_col, moves::RIGHT);
+            row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
+            clyde = new Ghost(current_row, current_col, moves::UP, ghosts_types::CLYDE);
             row_vector[current_col].push(clyde);
+        }
+
+        // pp represents power pellet
+        else if (row == "pp")
+        {
+            row_vector.push_back(Occupant_List(new Power(current_row, current_col, power_types::POWER_PELLET)));
         }
 
         // n represents a new line
@@ -287,6 +298,8 @@ Engine::Engine(std::string map_name)
         current_col++;
     }
 
+    ai = new AI{&board, &navigation, pacman, blinky, pinky, inky, clyde};
+
     // Initilize the ghost's target tiles
     if (blinky)
     {
@@ -345,7 +358,36 @@ Occupant *Engine::get_clyde()
 // Return whether or not pacman has collided with a ghost
 bool Engine::check_collision()
 {
-    return ((*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].find_occupant(type::GHOST));
+    if (blinky)
+    {
+        if (blinky->get_x_position() == pacman->get_x_position() && blinky->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::BLINKY) != ghost_states::HEADING_BACK)
+        {
+            return true;
+        }
+    }
+    if (pinky)
+    {
+        if (pinky->get_x_position() == pacman->get_x_position() && pinky->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::PINKY) != ghost_states::HEADING_BACK)
+        {
+            return true;
+        }
+    }
+    if (inky)
+    {
+        if (inky->get_x_position() == pacman->get_x_position() && inky->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::INKY) != ghost_states::HEADING_BACK)
+        {
+            return true;
+        }
+    }
+    if (clyde)
+    {
+        if (clyde->get_x_position() == pacman->get_x_position() && clyde->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::CLYDE) != ghost_states::HEADING_BACK)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // Reset pacman and ghosts positions
@@ -392,7 +434,7 @@ Navigation *Engine::get_navigation()
 // Return a pointer to the AI instance
 AI *Engine::get_ai()
 {
-    return &ai;
+    return ai;
 }
 
 // Return a pointer to the points instance

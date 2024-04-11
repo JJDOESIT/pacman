@@ -41,6 +41,19 @@ void Occupant_List::pop_specific_occupant(Occupant *occupant)
     }
 }
 
+void Occupant_List::set_state_of_all_ghosts(State_Manager *state_manager, int state)
+{
+    int count = 0;
+    while (count < oc_list.size())
+    {
+        if (oc_list[count]->get_type() == type::GHOST)
+        {
+            state_manager->set_ghost_state(static_cast<Ghost *>(oc_list[count])->get_type(), state);
+        }
+        count++;
+    }
+}
+
 // Return the first occurence of the given occupant
 Occupant *Occupant_List::find_occupant(int type)
 {

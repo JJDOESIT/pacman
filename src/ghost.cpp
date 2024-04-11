@@ -1,7 +1,8 @@
 #include "ghost.h"
 
-Ghost::Ghost(int x, int y, int d)
+Ghost::Ghost(int x, int y, int d, int t)
 {
+    Ghost::type = t;
     Occupant::set_type(type::GHOST);
     Occupant::set_position(x, y);
     Occupant::set_direction(d);
@@ -13,6 +14,12 @@ Ghost::Ghost(int x, int y, int d)
 void Ghost::set_mode(int m)
 {
     mode = m;
+}
+
+// Return the specific ghost type (blinky, pinky, inky or clyde)
+int Ghost::get_type()
+{
+    return Ghost::type;
 }
 
 // Return the ghost's mode
