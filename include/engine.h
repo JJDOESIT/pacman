@@ -20,11 +20,7 @@
 class Engine
 {
 private:
-    Pacman *pacman = nullptr;
-    Ghost *blinky = nullptr;
-    Ghost *pinky = nullptr;
-    Ghost *inky = nullptr;
-    Ghost *clyde = nullptr;
+    Occupant *characters[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
     Board board;
     State_Manager state_manager;
     Navigation navigation{&state_manager};
@@ -36,13 +32,9 @@ private:
 
 public:
     Engine(std::string map_name);
-    Occupant *get_pacman();
-    Occupant *get_blinky();
-    Occupant *get_pinky();
-    Occupant *get_inky();
-    Occupant *get_clyde();
+    Occupant *get_character(int character);
+    Occupant **get_all_characters();
     bool check_collision();
-    void reset_all_positions();
     Board *get_board();
     Navigation *get_navigation();
     AI *get_ai();

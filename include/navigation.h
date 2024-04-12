@@ -18,12 +18,15 @@ class Navigation
 private:
     State_Manager *state_manager;
 
+    void reset_position(Board *board, Occupant *occupant);
+
 public:
     Navigation(State_Manager *sm);
     bool *get_possible_moves(Occupant *occupant, Board *board);
     void move_occupant(Occupant *occupant, Board *board, int direction, Points *points = nullptr, int *powerup = nullptr);
     void move(Occupant *occupant, Board *board, int direction, Points *points = nullptr, int *powerup = nullptr);
-    void move_all_ghosts(Board *board, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde);
+
+    void reset_all_positions(Board *board, Occupant *characters[5]);
 };
 
 #endif

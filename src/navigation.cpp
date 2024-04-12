@@ -93,17 +93,41 @@ bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
         // Check if the ghost can move right
         if (y + 1 < board->get_cols() && occupant->get_direction() != moves::LEFT)
         {
-            if ((*board->get_board())[x][y + 1].find_occupant(type::WALL) == nullptr)
+            Occupant *wall = (*board->get_board())[x][y + 1].find_occupant(type::WALL);
+            if (wall == nullptr)
             {
                 moves[moves::RIGHT] = true;
+            }
+            else if (static_cast<Wall *>(wall)->get_wall_type() == wall_type::GATE)
+            {
+                int state = state_manager->get_ghost_state(static_cast<Ghost *>(occupant)->get_type());
+                if (state == ghost_states::ESCAPING || state == ghost_states::HEADING_BACK)
+                {
+                    if (state_manager->get_ghost_escape_x(static_cast<Ghost *>(occupant)->get_type()) == x && state_manager->get_ghost_escape_y(static_cast<Ghost *>(occupant)->get_type()) == y + 1)
+                    {
+                        moves[moves::RIGHT] = true;
+                    }
+                }
             }
         }
         // Check if the ghost can move left
         if (y - 1 >= 0 && occupant->get_direction() != moves::RIGHT)
         {
-            if ((*board->get_board())[x][y - 1].find_occupant(type::WALL) == nullptr)
+            Occupant *wall = (*board->get_board())[x][y - 1].find_occupant(type::WALL);
+            if (wall == nullptr)
             {
                 moves[moves::LEFT] = true;
+            }
+            else if (static_cast<Wall *>(wall)->get_wall_type() == wall_type::GATE)
+            {
+                int state = state_manager->get_ghost_state(static_cast<Ghost *>(occupant)->get_type());
+                if (state == ghost_states::ESCAPING || state == ghost_states::HEADING_BACK)
+                {
+                    if (state_manager->get_ghost_escape_x(static_cast<Ghost *>(occupant)->get_type()) == x && state_manager->get_ghost_escape_y(static_cast<Ghost *>(occupant)->get_type()) == y - 1)
+                    {
+                        moves[moves::LEFT] = true;
+                    }
+                }
             }
         }
     }
@@ -197,33 +221,58 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
 // User interface class to move a given occupant a given direction
 void Navigation::move(Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
 {
-    bool *moves = get_possible_moves(occupant, board);
-
-    if (moves[direction])
+    if (occupant)
     {
-        move_occupant(occupant, board, direction, points, powerup);
-    }
+        bool *moves = get_possible_moves(occupant, board);
 
-    delete[] moves;
+        if (moves[direction])
+        {
+            move_occupant(occupant, board, direction, points, powerup);
+        }
+
+        delete[] moves;
+    }
 }
 
-// Move all ghost's
-void Navigation::move_all_ghosts(Board *board, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde)
+// Reset the position of the given occupant
+void Navigation::reset_position(Board *board, Occupant *occupant)
 {
-    if (blinky)
+
+    if (occupant->get_type() == type::PLAYER)
     {
-        move(blinky, board, blinky->get_direction());
+        (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].pop_specific_occupant(occupant);
+        occupant->set_position(static_cast<Pacman *>(occupant)->get_initial_x(), static_cast<Pacman *>(occupant)->get_initial_y());
+        (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].push(occupant);
     }
-    if (pinky)
+    else if (occupant->get_type() == type::GHOST)
     {
-        move(pinky, board, pinky->get_direction());
+        (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].pop_specific_occupant(occupant);
+        occupant->set_position(static_cast<Ghost *>(occupant)->get_initial_x(), static_cast<Ghost *>(occupant)->get_initial_y());
+        (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].push(occupant);
     }
-    if (inky)
+}
+
+// Reset all positions
+void Navigation::reset_all_positions(Board *board, Occupant *characters[5])
+{
+    if (characters[characters::PACMAN])
     {
-        move(inky, board, inky->get_direction());
+        reset_position(board, characters[characters::PACMAN]);
     }
-    if (clyde)
+    if (characters[characters::BLINKY])
     {
-        move(clyde, board, clyde->get_direction());
+        reset_position(board, characters[characters::BLINKY]);
+    }
+    if (characters[characters::PINKY])
+    {
+        reset_position(board, characters[characters::PINKY]);
+    }
+    if (characters[characters::INKY])
+    {
+        reset_position(board, characters[characters::INKY]);
+    }
+    if (characters[characters::CLYDE])
+    {
+        reset_position(board, characters[characters::CLYDE]);
     }
 }

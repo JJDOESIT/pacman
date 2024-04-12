@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "draw_manager.h"
 #include "clock.h"
+#include "ghost_clocks.h"
 #include "SFML/Graphics.hpp"
 #include "linear_directions.h"
 
@@ -23,23 +24,25 @@ int main()
 
     sf::Event event;
 
-    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::BLINKY, 12, 14);
+    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::BLINKY, 12, 13);
     e.get_state_manager()->set_ghost_escape_tile(ghosts_types::PINKY, 12, 14);
-    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::INKY, 12, 14);
+    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::INKY, 12, 13);
     e.get_state_manager()->set_ghost_escape_tile(ghosts_types::CLYDE, 12, 14);
 
+    const float INITIAL_GHOST_TIME = 300;
+
+    Ghost_Clocks ghost_clocks(300);
     Clock player_clock(200);
-    Clock ghost_clock(300);
     Clock player_animation_clock(100);
 
     e.get_state_manager()->push(7000, ghost_modes::SCATTER);
     e.get_state_manager()->push(20000, ghost_modes::CHASE);
 
     bool is_stopped = false;
-    int buffer_direction = e.get_pacman()->get_direction();
+    int buffer_direction = e.get_character(characters::PACMAN)->get_direction();
     int intended_direction = buffer_direction;
 
-    e.get_ai()->move_all(e.get_state_manager());
+    e.get_ai()->move_all(e.get_state_manager(), &ghost_clocks);
 
     while (window.isOpen())
     {
@@ -47,7 +50,8 @@ int main()
 
         // Update all the clocks
         player_clock.update();
-        ghost_clock.update();
+        ghost_clocks.update_all();
+
         player_animation_clock.update();
         e.get_state_manager()->update_mode();
 
@@ -56,14 +60,14 @@ int main()
         {
             player_clock.restart();
 
-            bool *moves = e.get_navigation()->get_possible_moves(e.get_pacman(), e.get_board());
+            bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
 
             // If pacman is able to move in the intended direction, and pacman is not trying to reverse in-between cells
-            if (moves[intended_direction] && e.get_pacman()->get_direction() == buffer_direction)
+            if (moves[intended_direction] && e.get_character(characters::PACMAN)->get_direction() == buffer_direction)
             {
                 // Move pacman in the intended direction and set his buffer_direction to face the same way
                 int powerup = -1;
-                e.get_navigation()->move(e.get_pacman(), e.get_board(), intended_direction, e.get_points(), &powerup);
+                e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), intended_direction, e.get_points(), &powerup);
                 if (powerup == power_types::POWER_PELLET)
                 {
                     e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
@@ -72,20 +76,20 @@ int main()
             }
             // Else if pacman is trying to reverse between cells
             // ie. Pacman internally is moving right, but on screen moving left
-            else if (e.get_pacman()->get_direction() != buffer_direction)
+            else if (e.get_character(characters::PACMAN)->get_direction() != buffer_direction)
             {
                 // Set pacman's internal direction to the buffer direction
                 // Note: This is because this means pacman has successfully turned around and reached
                 //       original starting position. When we update his internal position to reflect this,
                 //       his target tile will now be the correct tile.
-                e.get_pacman()->set_direction(buffer_direction);
+                e.get_character(characters::PACMAN)->set_direction(buffer_direction);
             }
             // Else if pacman is moving along a straight path
             else
             {
                 // Move pacman over a tile
                 int powerup = -1;
-                e.get_navigation()->move(e.get_pacman(), e.get_board(), buffer_direction, e.get_points(), &powerup);
+                e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), buffer_direction, e.get_points(), &powerup);
                 if (powerup == power_types::POWER_PELLET)
                 {
                     e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
@@ -100,11 +104,11 @@ int main()
                 //       target tile to his new position, causing a jump in frames. To solve this, we set
                 //       his internal direction to be his intended direction (since he is able to move there),
                 //       that way his target tile will be the correct direction.
-                bool *moves = e.get_navigation()->get_possible_moves(e.get_pacman(), e.get_board());
+                bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
                 if (moves[intended_direction])
                 {
                     buffer_direction = intended_direction;
-                    e.get_pacman()->set_direction(buffer_direction);
+                    e.get_character(characters::PACMAN)->set_direction(buffer_direction);
                 }
                 delete[] moves;
             }
@@ -118,22 +122,27 @@ int main()
         //       as they swap places
         if (e.check_collision())
         {
+            // Set collision to be true
             e.get_life_manager()->set_collision(true);
-            e.get_life_manager()->decrement();
 
+            // If pacman has collided with a ghost while they are in normal mode
             if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
             {
-                ghost_clock.restart();
+                // Decrease lives by one, restart their clocks, reset all positions and states
+                e.get_life_manager()->decrement();
+                ghost_clocks.restart_all();
                 player_clock.restart();
-                e.reset_all_positions();
-                e.get_state_manager()->set_ghost_state(ghosts_types::BLINKY, ghost_states::ESCAPING);
-                e.get_state_manager()->set_ghost_state(ghosts_types::PINKY, ghost_states::ESCAPING);
-                e.get_state_manager()->set_ghost_state(ghosts_types::INKY, ghost_states::ESCAPING);
-                e.get_state_manager()->set_ghost_state(ghosts_types::CLYDE, ghost_states::ESCAPING);
+                e.get_navigation()->reset_all_positions(e.get_board(), e.get_all_characters());
+                e.get_state_manager()->set_all_ghost_states(ghost_states::ESCAPING);
             }
             else
             {
-                (*(e.get_board()->get_board()))[e.get_pacman()->get_x_position()][e.get_pacman()->get_y_position()].set_state_of_all_ghosts(e.get_state_manager(), ghost_states::HEADING_BACK);
+                std::vector<Occupant *> occupants = (*(e.get_board()->get_board()))[e.get_character(characters::PACMAN)->get_x_position()][e.get_character(characters::PACMAN)->get_y_position()].get_all_occupants(type::GHOST);
+                for (Occupant *occupant : occupants)
+                {
+                    e.get_state_manager()->set_ghost_state(static_cast<Ghost *>(occupant)->get_type(), ghost_states::HEADING_BACK);
+                    ghost_clocks.clocks[static_cast<Ghost *>(occupant)->get_type()]->set_threshold(150);
+                }
             }
         }
 
@@ -142,22 +151,31 @@ int main()
         //       won't function properly. This is because if we call AI first, the ghost will calculate the target
         //       tile based on his position before he is moved, not the position drawn on the screen. Meaning that
         //       the draw call will draw the ghost to where he already is, rendering the lerp animation useless.
-        if (ghost_clock.need_restart())
+        for (int ghost = 0; ghost < 4; ghost++)
         {
-            e.get_navigation()->move_all_ghosts(e.get_board(), e.get_blinky(), e.get_pinky(), e.get_inky(), e.get_clyde());
+            // If the ghosts has moved one coin over
+            if (ghost_clocks.clocks[ghost]->need_restart())
+            {
+                // Move the ghosts corresponding to their internal direction
+                if (e.get_character(ghost))
+                {
+                    e.get_navigation()->move(e.get_character(ghost), e.get_board(), e.get_character(ghost)->get_direction());
 
-            // If the current ghost mode is scatter, call the scatter AI
-            e.get_ai()->move_all(e.get_state_manager());
+                    // Calculate the ghosts new direction given their current state
+                    e.get_ai()->move_based_on_state(e.get_state_manager(), &ghost_clocks, ghost);
 
-            ghost_clock.restart();
+                    ghost_clocks.clocks[ghost]->restart();
+                }
+            }
         }
 
         if (player_animation_clock.need_restart())
         {
-            Pacman *pacman = static_cast<Pacman *>(e.get_pacman());
+            Pacman *pacman = static_cast<Pacman *>(e.get_character(characters::PACMAN));
             pacman->set_animation_state((pacman->get_animation_state() + 1) % 3);
             player_animation_clock.restart();
         }
+
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
@@ -166,7 +184,7 @@ int main()
             }
             if (event.type == sf::Event::KeyPressed)
             {
-                bool *moves = e.get_navigation()->get_possible_moves(e.get_pacman(), e.get_board());
+                bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
 
                 if (event.key.code == sf::Keyboard::W)
                 {
@@ -178,7 +196,7 @@ int main()
                         if (is_stopped)
                         {
                             player_clock.restart();
-                            e.get_pacman()->set_direction(moves::UP);
+                            e.get_character(characters::PACMAN)->set_direction(moves::UP);
                         }
                     }
                     else if (buffer_direction != moves::UP)
@@ -196,7 +214,7 @@ int main()
                         if (is_stopped)
                         {
                             player_clock.restart();
-                            e.get_pacman()->set_direction(moves::RIGHT);
+                            e.get_character(characters::PACMAN)->set_direction(moves::RIGHT);
                         }
                     }
                     else if (buffer_direction != moves::RIGHT)
@@ -214,7 +232,7 @@ int main()
                         if (is_stopped)
                         {
                             player_clock.restart();
-                            e.get_pacman()->set_direction(moves::DOWN);
+                            e.get_character(characters::PACMAN)->set_direction(moves::DOWN);
                         }
                     }
                     else if (buffer_direction != moves::DOWN)
@@ -233,7 +251,7 @@ int main()
                         if (is_stopped)
                         {
                             player_clock.restart();
-                            e.get_pacman()->set_direction(moves::LEFT);
+                            e.get_character(characters::PACMAN)->set_direction(moves::LEFT);
                         }
                     }
                     else if (buffer_direction != moves::LEFT)
@@ -248,16 +266,12 @@ int main()
 
         d.draw_board(e.get_board()->get_board());
 
-        // If there is no collision, draw lerping animation
+        // If there is no collision or if the ghosts are frightened, draw lerping animation
         if (!e.get_life_manager()->get_collision() || e.get_state_manager()->get_ghost_mode() == ghost_modes::FRIGHTENED)
         {
-            bool frightened;
-            frightened = (e.get_state_manager()->get_ghost_mode() == ghost_modes::FRIGHTENED);
-            d.ghost_animation(e.get_blinky(), "blinky", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::BLINKY));
-            d.ghost_animation(e.get_pinky(), "pinky", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::PINKY));
-            d.ghost_animation(e.get_inky(), "inky", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::INKY));
-            d.ghost_animation(e.get_clyde(), "clyde", ghost_clock.get_tick(), frightened, e.get_state_manager()->get_ghost_state(ghosts_types::CLYDE));
+            d.draw_all_ghost_animation(e.get_state_manager(), e.get_all_characters(), &ghost_clocks);
 
+            // If a collision occured, set the collision to false
             if (e.get_life_manager()->get_collision())
             {
                 e.get_life_manager()->set_collision(false);
@@ -266,38 +280,35 @@ int main()
         // Else if there is a collision, reset positions and decrease lives
         else
         {
-            d.draw_ghost(e.get_blinky(), e.get_blinky()->get_x_position(), e.get_blinky()->get_y_position(), "blinky");
-            d.draw_ghost(e.get_pinky(), e.get_pinky()->get_x_position(), e.get_pinky()->get_y_position(), "pinky");
-            d.draw_ghost(e.get_inky(), e.get_inky()->get_x_position(), e.get_inky()->get_y_position(), "inky");
-            d.draw_ghost(e.get_clyde(), e.get_clyde()->get_x_position(), e.get_clyde()->get_y_position(), "clyde");
+            d.draw_all_ghosts(e.get_all_characters());
 
-            e.get_ai()->move_all(e.get_state_manager());
+            e.get_ai()->move_all(e.get_state_manager(), &ghost_clocks);
 
             e.get_life_manager()->set_collision(false);
         }
 
-        int x = e.get_pacman()->get_x_position();
-        int y = e.get_pacman()->get_y_position();
+        int x = e.get_character(characters::PACMAN)->get_x_position();
+        int y = e.get_character(characters::PACMAN)->get_y_position();
 
-        int target_x = x + linear_directions_one[e.get_pacman()->get_direction()][0];
-        int target_y = y + linear_directions_one[e.get_pacman()->get_direction()][1];
+        int target_x = x + linear_directions_one[e.get_character(characters::PACMAN)->get_direction()][0];
+        int target_y = y + linear_directions_one[e.get_character(characters::PACMAN)->get_direction()][1];
 
         // If pacman is stopped
         if ((*(e.get_board()->get_board()))[target_x][target_y].find_occupant(type::WALL))
         {
-            d.pacman_animation(e.get_pacman(), x, y, x, y, buffer_direction, player_clock.get_tick());
+            d.pacman_animation(e.get_character(characters::PACMAN), x, y, x, y, buffer_direction, player_clock.get_tick());
             is_stopped = true;
         }
         // Else if pacman is moving along a straight path
-        else if (buffer_direction == e.get_pacman()->get_direction())
+        else if (buffer_direction == e.get_character(characters::PACMAN)->get_direction())
         {
-            d.pacman_animation(e.get_pacman(), x, y, target_x, target_y, buffer_direction, player_clock.get_tick());
+            d.pacman_animation(e.get_character(characters::PACMAN), x, y, target_x, target_y, buffer_direction, player_clock.get_tick());
             is_stopped = false;
         }
         // Else if pacman is reversing between cells
         else
         {
-            d.pacman_animation(e.get_pacman(), target_x, target_y, x, y, buffer_direction, player_clock.get_tick());
+            d.pacman_animation(e.get_character(characters::PACMAN), target_x, target_y, x, y, buffer_direction, player_clock.get_tick());
             is_stopped = false;
         }
 

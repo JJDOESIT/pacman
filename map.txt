@@ -1,5 +1,5 @@
 tlcd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/trcc/tlcc/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/trcd/n/
-svld/p/c/c/c/c/c/c/c/c/c/c/c/svmr/svml/c/c/c/c/c/c/pp/c/c/c/c/c/svrd/n/
+svld/pp/c/c/c/c/c/c/p/c/c/c/c/svmr/svml/c/c/c/c/c/c/c/c/c/c/c/pp/svrd/n/
 svld/c/tlcs/shts/shts/trcs/c/tlcs/shts/shts/shts/trcs/c/svmr/svml/c/tlcs/shts/shts/shts/trcs/c/tlcs/shts/shts/trcs/c/svrd/n/
 svld/c/svml/f/f/svmr/c/svml/f/f/f/svmr/c/svmr/svml/c/svml/f/f/f/svmr/c/svml/f/f/svmr/c/svrd/n/
 svld/c/blcs/shbs/shbs/brcs/c/blcs/shbs/shbs/shbs/brcs/c/blcsc/brcsc/c/blcs/shbs/shbs/shbs/brcs/c/blcs/shbs/shbs/brcs/c/svrd/n/
@@ -11,7 +11,7 @@ blcd/shbd/shbd/shbd/shbd/trcsc/c/svml/blcsc/shts/shts/trcsc/s/svmr/svml/s/tlcsc/
 f/f/f/f/f/svld/c/svml/tlcsc/shbs/shbs/brcsc/s/blcsc/brcsc/s/blcsc/shbs/shbs/trcsc/svmr/c/svrd/f/f/f/f/f/n/
 f/f/f/f/f/svld/c/svml/svmr/s/s/s/s/s/s/s/s/s/s/svml/svmr/c/svrd/f/f/f/f/f/n/
 f/f/f/f/f/svld/c/svml/svmr/s/stlc/shbd/shbd/gate/gate/shbd/shbd/strc/s/svml/svmr/c/svrd/f/f/f/f/f/n/
-shtd/shtd/shtd/shtd/shtd/brcsc/c/blcsc/brcsc/s/svrd/s/inky/s/s/clyde/pinky/svld/s/blcsc/brcsc/c/blcsc/shtd/shtd/shtd/shtd/shtd/n/
+shtd/shtd/shtd/shtd/shtd/brcsc/c/blcsc/brcsc/s/svrd/blinky/inky/s/s/clyde/pinky/svld/s/blcsc/brcsc/c/blcsc/shtd/shtd/shtd/shtd/shtd/n/
 39/s/s/s/s/s/c/s/s/s/svrd/f/f/f/f/f/f/svld/s/s/s/c/s/s/s/s/s/19/n/
 shbd/shbd/shbd/shbd/shbd/trcsc/c/tlcsc/trcsc/s/svrd/f/f/f/f/f/f/svld/s/tlcsc/trcsc/c/tlcsc/shbd/shbd/shbd/shbd/shbd/n/
 s/s/s/s/s/svld/c/svml/svmr/s/sblc/shtd/shtd/shtd/shtd/shtd/shtd/sbrc/s/svml/svmr/c/svrd/s/s/s/s/s/n/
@@ -27,5 +27,5 @@ tlccv/shts/brcsc/c/blcsc/brcsc/c/svml/svmr/c/blcs/shbs/shbs/trcsc/tlcsc/shbs/shb
 svld/c/c/c/c/c/c/svml/svmr/c/c/c/c/svml/svmr/c/c/c/c/svml/svmr/c/c/c/c/c/c/svrd/n/
 svld/c/tlcsc/shts/shts/shts/shts/brcsc/blcsc/shts/shts/trcsc/c/svml/svmr/c/tlcsc/shts/shts/brcsc/blcsc/shts/shts/shts/shts/trcsc/c/svrd/n/
 svld/c/blcsc/shbs/shbs/shbs/shbs/shbs/shbs/shbs/shbs/brcsc/c/blcsc/brcsc/c/blcsc/shbs/shbs/shbs/shbs/shbs/shbs/shbs/shbs/brcsc/c/svrd/n/
-svld/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/svrd/n/
+svld/pp/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/c/pp/svrd/n/
 blcd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/brcd/e/

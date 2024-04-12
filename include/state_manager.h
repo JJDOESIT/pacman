@@ -29,6 +29,7 @@ public:
 
     void set_ghost_state(int ghost, int state);
     int get_ghost_state(int ghost);
+    void set_all_ghost_states(int state);
 
     void set_ghost_escape_tile(int ghost, int x, int y);
     int get_ghost_escape_x(int ghost);

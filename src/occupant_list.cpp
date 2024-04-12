@@ -41,17 +41,20 @@ void Occupant_List::pop_specific_occupant(Occupant *occupant)
     }
 }
 
-void Occupant_List::set_state_of_all_ghosts(State_Manager *state_manager, int state)
+// Return a vector of all the occupants of the given type
+std::vector<Occupant *> Occupant_List::get_all_occupants(int type)
 {
+    std::vector<Occupant *> occupant_list;
     int count = 0;
     while (count < oc_list.size())
     {
-        if (oc_list[count]->get_type() == type::GHOST)
+        if (oc_list[count]->get_type() == type)
         {
-            state_manager->set_ghost_state(static_cast<Ghost *>(oc_list[count])->get_type(), state);
+            occupant_list.push_back(oc_list[count]);
         }
         count++;
     }
+    return occupant_list;
 }
 
 // Return the first occurence of the given occupant

@@ -16,7 +16,7 @@ public:
     void push(Occupant *occupant);
     void pop_occupant(int type);
     void pop_specific_occupant(Occupant *occupant);
-    void set_state_of_all_ghosts(State_Manager *state_manager, int state);
+    std::vector<Occupant *> get_all_occupants(int type);
     std::vector<Occupant *> &get_oc_list();
     void print_occupant_list();
     Occupant *find_occupant(int type);

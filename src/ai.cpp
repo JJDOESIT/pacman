@@ -1,36 +1,14 @@
 #include "ai.h"
 
-AI::AI(Board *b, Navigation *n, Pacman *pacman, Occupant *blinky, Occupant *pinky, Occupant *inky, Occupant *clyde)
+AI::AI(Board *b, Navigation *n, Occupant *characters[5])
 {
     AI::b = b;
     AI::n = n;
-    AI::pacman = pacman;
-    AI::blinky = blinky;
-    AI::pinky = pinky;
-    AI::inky = inky;
-    AI::clyde = clyde;
-}
-
-// Return the corresponding ghost
-Occupant *AI::get_ghost(int ghost)
-{
-    if (ghost == ghosts_types::BLINKY)
-    {
-        return blinky;
-    }
-    else if (ghost == ghosts_types::PINKY)
-    {
-        return pinky;
-    }
-    else if (ghost == ghosts_types::INKY)
-    {
-        return inky;
-    }
-    else if (ghost == ghosts_types::CLYDE)
-    {
-        return clyde;
-    }
-    return nullptr;
+    AI::characters[characters::BLINKY] = characters[characters::BLINKY];
+    AI::characters[characters::PINKY] = characters[characters::PINKY];
+    AI::characters[characters::INKY] = characters[characters::INKY];
+    AI::characters[characters::CLYDE] = characters[characters::CLYDE];
+    AI::characters[characters::PACMAN] = characters[characters::PACMAN];
 }
 
 // Calculate the euclidean distance between two given points
@@ -84,7 +62,7 @@ int AI::best_direction(bool moves[], Occupant *occupant, int target_x, int targe
 // Handle the ghost's scatter behaivor
 void AI::scatter(int ghost)
 {
-    Occupant *occupant = get_ghost(ghost);
+    Occupant *occupant = characters[ghost];
     bool *moves = n->get_possible_moves(occupant, b);
 
     int target_x = static_cast<Ghost *>(occupant)->get_target_x_tile();
@@ -101,12 +79,12 @@ void AI::scatter(int ghost)
 // Handle blinky's chase mode
 void AI::blinky_ai(int ghost)
 {
-    Occupant *blinky = get_ghost(ghost);
+    Occupant *blinky = characters[ghost];
     bool *moves = n->get_possible_moves(blinky, b);
 
     // Set blinky's target tile to be pacman's position
-    int target_x = static_cast<Pacman *>(pacman)->get_x_position();
-    int target_y = static_cast<Pacman *>(pacman)->get_y_position();
+    int target_x = static_cast<Pacman *>(characters[characters::PACMAN])->get_x_position();
+    int target_y = static_cast<Pacman *>(characters[characters::PACMAN])->get_y_position();
 
     int direction = best_direction(moves, blinky, target_x, target_y);
 
@@ -119,15 +97,15 @@ void AI::blinky_ai(int ghost)
 // Handle pinky's chase mode
 void AI::pinky_ai(int ghost)
 {
-    Occupant *pinky = get_ghost(ghost);
+    Occupant *pinky = characters[ghost];
     bool *moves = n->get_possible_moves(pinky, b);
 
-    int target_x = static_cast<Pacman *>(pacman)->get_x_position();
-    int target_y = static_cast<Pacman *>(pacman)->get_y_position();
+    int target_x = static_cast<Pacman *>(characters[characters::PACMAN])->get_x_position();
+    int target_y = static_cast<Pacman *>(characters[characters::PACMAN])->get_y_position();
 
     // Set pinky's target tile to be four spaces ahead of pacman
-    target_x += linear_directions_four[static_cast<Pacman *>(pacman)->get_direction()][0];
-    target_y += linear_directions_four[static_cast<Pacman *>(pacman)->get_direction()][1];
+    target_x += linear_directions_four[static_cast<Pacman *>(characters[characters::PACMAN])->get_direction()][0];
+    target_y += linear_directions_four[static_cast<Pacman *>(characters[characters::PACMAN])->get_direction()][1];
 
     int direction = best_direction(moves, pinky, target_x, target_y);
 
@@ -140,20 +118,20 @@ void AI::pinky_ai(int ghost)
 // Handle inky's chase mode
 void AI::inky_ai(int ghost)
 {
-    Occupant *inky = get_ghost(ghost);
+    Occupant *inky = characters[ghost];
     bool *moves = n->get_possible_moves(inky, b);
 
-    int target_x = static_cast<Pacman *>(pacman)->get_x_position();
-    int target_y = static_cast<Pacman *>(pacman)->get_y_position();
+    int target_x = static_cast<Pacman *>(characters[characters::PACMAN])->get_x_position();
+    int target_y = static_cast<Pacman *>(characters[characters::PACMAN])->get_y_position();
 
     // Find the space two ahead of pacman's current direction
-    target_x += linear_directions_two[static_cast<Pacman *>(pacman)->get_direction()][0];
-    target_y += linear_directions_two[static_cast<Pacman *>(pacman)->get_direction()][1];
+    target_x += linear_directions_two[static_cast<Pacman *>(characters[characters::PACMAN])->get_direction()][0];
+    target_y += linear_directions_two[static_cast<Pacman *>(characters[characters::PACMAN])->get_direction()][1];
 
     // Calculate the x and y distances between the space two ahead of pacman
     // and blinky
-    int x_distance = std::abs(blinky->get_x_position() - target_x);
-    int y_distance = std::abs(blinky->get_y_position() - target_y);
+    int x_distance = std::abs(characters[characters::BLINKY]->get_x_position() - target_x);
+    int y_distance = std::abs(characters[characters::BLINKY]->get_y_position() - target_y);
 
     // Set inky to move towards the best route that will bring him closer to his target tile
     // (target tile is double the vector of x_distance and y_distance)
@@ -168,11 +146,11 @@ void AI::inky_ai(int ghost)
 // Handle clyde's chase mode
 void AI::clyde_ai(int ghost)
 {
-    Occupant *clyde = get_ghost(ghost);
+    Occupant *clyde = characters[ghost];
     bool *moves = n->get_possible_moves(clyde, b);
 
-    int target_x = static_cast<Pacman *>(pacman)->get_x_position();
-    int target_y = static_cast<Pacman *>(pacman)->get_y_position();
+    int target_x = static_cast<Pacman *>(characters[characters::PACMAN])->get_x_position();
+    int target_y = static_cast<Pacman *>(characters[characters::PACMAN])->get_y_position();
 
     int distance = euclidean_distance(clyde->get_x_position(), clyde->get_y_position(), target_x, target_y);
 
@@ -193,7 +171,7 @@ void AI::clyde_ai(int ghost)
 // Set the occupant to the farthest tile away from pacman
 void AI::run(int ghost)
 {
-    Occupant *occupant = get_ghost(ghost);
+    Occupant *occupant = characters[ghost];
     bool *moves = n->get_possible_moves(occupant, b);
 
     int tie_breaker[4] = {0, 4, 2, 1};
@@ -208,7 +186,7 @@ void AI::run(int ghost)
             int x = occupant->get_x_position();
             int y = occupant->get_y_position();
 
-            int d = euclidean_distance(x + linear_directions_one[i][0], y + linear_directions_one[i][1], pacman->get_x_position(), pacman->get_y_position());
+            int d = euclidean_distance(x + linear_directions_one[i][0], y + linear_directions_one[i][1], characters[characters::PACMAN]->get_x_position(), characters[characters::PACMAN]->get_y_position());
 
             // If the shortest direction hasn't been set yet (first iteration of the loop)
             if (longest_direction == -1)
@@ -242,14 +220,14 @@ void AI::run(int ghost)
 // Assign a ghost to move in it's current direction
 void AI::move_in_current_direction(int ghost)
 {
-    Occupant *occupant = get_ghost(ghost);
+    Occupant *occupant = characters[ghost];
     static_cast<Ghost *>(occupant)->set_best_move(occupant->get_x_position() + linear_directions_one[occupant->get_direction()][0], occupant->get_y_position() + linear_directions_one[occupant->get_direction()][1]);
 }
 
 // Find the direction that will bring the ghost closer to its escape tile
 void AI::move_to_escape_tile(State_Manager *state_manager, int ghost)
 {
-    Occupant *occupant = get_ghost(ghost);
+    Occupant *occupant = characters[ghost];
     bool *moves = n->get_possible_moves(occupant, b);
 
     int direction = best_direction(moves, occupant, state_manager->get_ghost_escape_x(ghost), state_manager->get_ghost_escape_y(ghost));
@@ -263,7 +241,7 @@ void AI::move_to_escape_tile(State_Manager *state_manager, int ghost)
 // Return the ghost to its initial starting position
 void AI::return_to_start(State_Manager *state_manager, int ghost)
 {
-    Occupant *occupant = get_ghost(ghost);
+    Occupant *occupant = characters[ghost];
     bool *moves = n->get_possible_moves(occupant, b);
 
     int direction = best_direction(moves, occupant, state_manager->get_ghost_escape_x(ghost), state_manager->get_ghost_escape_y(ghost));
@@ -275,9 +253,9 @@ void AI::return_to_start(State_Manager *state_manager, int ghost)
 }
 
 // Move ghosts based on their current state and mode
-void AI::move_based_on_state(State_Manager *state_manager, int ghost)
+void AI::move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_clocks, int ghost)
 {
-    Occupant *occupant = get_ghost(ghost);
+    Occupant *occupant = characters[ghost];
 
     // If the ghost is not nullptr
     if (occupant)
@@ -307,6 +285,7 @@ void AI::move_based_on_state(State_Manager *state_manager, int ghost)
                 // Move them once more in their current direction
                 move_in_current_direction(ghost);
                 state_manager->set_ghost_state(ghost, ghost_states::DISABLED);
+                ghost_clocks->clocks[ghost]->set_threshold(ghost_clocks->clocks[ghost]->get_initial_time());
             }
             // Else if the ghost is still heading back
             else
@@ -327,7 +306,17 @@ void AI::move_based_on_state(State_Manager *state_manager, int ghost)
             }
             else if (ghost == ghosts_types::INKY)
             {
-                inky_ai(ghost);
+                // Note: This is needed because if blinky doesn't exist, we cannot call inky's
+                //       AI function as he is dependent on blinky's position. In this case,
+                //       inky will instead act like blinky, and chase pacman directly.
+                if (characters[characters::BLINKY])
+                {
+                    inky_ai(ghost);
+                }
+                else
+                {
+                    blinky_ai(ghost);
+                }
             }
             else if (ghost == ghosts_types::CLYDE)
             {
@@ -348,10 +337,10 @@ void AI::move_based_on_state(State_Manager *state_manager, int ghost)
 }
 
 // Move all ghosts
-void AI::move_all(State_Manager *state_manager)
+void AI::move_all(State_Manager *state_manager, Ghost_Clocks *ghost_clocks)
 {
-    move_based_on_state(state_manager, ghosts_types::BLINKY);
-    move_based_on_state(state_manager, ghosts_types::PINKY);
-    move_based_on_state(state_manager, ghosts_types::INKY);
-    move_based_on_state(state_manager, ghosts_types::CLYDE);
+    move_based_on_state(state_manager, ghost_clocks, ghosts_types::BLINKY);
+    move_based_on_state(state_manager, ghost_clocks, ghosts_types::PINKY);
+    move_based_on_state(state_manager, ghost_clocks, ghosts_types::INKY);
+    move_based_on_state(state_manager, ghost_clocks, ghosts_types::CLYDE);
 }

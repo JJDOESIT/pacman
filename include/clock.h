@@ -8,6 +8,7 @@ class Clock
 private:
     float tick;
     float threshold;
+    float initial_time;
     float time;
     float total_time;
     sf::Clock c;
@@ -23,6 +24,7 @@ public:
     float get_time();
     float get_total_time();
     float get_threshold();
+    float get_initial_time();
     bool need_restart();
 };
 

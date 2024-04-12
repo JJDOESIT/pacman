@@ -56,6 +56,15 @@ int State_Manager::get_ghost_state(int ghost)
     return ghost_states[ghost];
 }
 
+// Set the state of all ghosts
+void State_Manager::set_all_ghost_states(int state)
+{
+    set_ghost_state(ghosts_types::BLINKY, state);
+    set_ghost_state(ghosts_types::PINKY, state);
+    set_ghost_state(ghosts_types::INKY, state);
+    set_ghost_state(ghosts_types::CLYDE, state);
+}
+
 // Set the escape tile of the given ghost
 void State_Manager::set_ghost_escape_tile(int ghost, int x, int y)
 {

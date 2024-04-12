@@ -4,6 +4,7 @@
 Clock::Clock(float t)
 {
     threshold = t;
+    initial_time = t;
     tick = 0;
     time = 0;
     total_time = 0;
@@ -60,6 +61,12 @@ float Clock::get_total_time()
 float Clock::get_threshold()
 {
     return threshold;
+}
+
+// Return initial time
+float Clock::get_initial_time()
+{
+    return initial_time;
 }
 
 // Return whether the time needs a restart or not

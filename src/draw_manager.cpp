@@ -300,27 +300,43 @@ void Draw_Manager::draw_pacman(Occupant *pacman, float x, float y, int direction
 }
 
 // Draw the ghost's in accordence with a given start and end position using linear interpolation
-void Draw_Manager::ghost_animation(Occupant *ghost, std::string name, float tick, bool frightened, int state)
+void Draw_Manager::ghost_animation(State_Manager *state_manager, Occupant *ghost, std::string name, float tick)
 {
     if (ghost)
     {
         float *current_position;
         current_position = lerp(ghost->get_x_position(), ghost->get_y_position(), static_cast<Ghost *>(ghost)->get_best_x_tile(), static_cast<Ghost *>(ghost)->get_best_y_tile(), tick);
 
-        if (state == ghost_states::HEADING_BACK)
+        // If the ghost has been eaten, draw ghost eyes
+        if (state_manager->get_ghost_state(static_cast<Ghost *>(ghost)->get_type()) == ghost_states::HEADING_BACK)
         {
             draw_ghost_eyes(ghost, current_position[0], current_position[1]);
         }
-        else if (frightened)
+        // Else if the ghost is frightened, draw scared ghost
+        else if (state_manager->get_ghost_mode() == ghost_modes::FRIGHTENED)
         {
             draw_frightened_ghost(ghost, current_position[0], current_position[1]);
         }
+        // Else draw regular ghost
         else
         {
             draw_ghost(ghost, current_position[0], current_position[1], name);
         }
 
         delete[] current_position;
+    }
+}
+
+// Draw all moving ghosts
+void Draw_Manager::draw_all_ghost_animation(State_Manager *state_manager, Occupant *characters[5], Ghost_Clocks *ghost_clocks)
+{
+    std::string names[4] = {"blinky", "pinky", "inky", "clyde"};
+    for (int character = 0; character < 4; character++)
+    {
+        if (characters[character])
+        {
+            ghost_animation(state_manager, characters[character], names[character], ghost_clocks->clocks[character]->get_tick());
+        }
     }
 }
 
@@ -350,6 +366,19 @@ void Draw_Manager::draw_ghost(Occupant *ghost, float x, float y, std::string nam
         }
 
         body->draw(cell);
+    }
+}
+
+// Draw all static ghosts
+void Draw_Manager::draw_all_ghosts(Occupant *characters[5])
+{
+    std::string names[4] = {"blinky", "pinky", "inky", "clyde"};
+    for (int character = 0; character < 4; character++)
+    {
+        if (characters[character])
+        {
+            draw_ghost(characters[character], characters[character]->get_x_position(), characters[character]->get_y_position(), names[character]);
+        }
     }
 }
 

@@ -9,6 +9,18 @@ enum ghosts_types
     CLYDE,
 };
 
+namespace characters
+{
+    enum game_characters
+    {
+        BLINKY,
+        PINKY,
+        INKY,
+        CLYDE,
+        PACMAN,
+    };
+}
+
 enum ghost_modes
 {
     SCATTER,

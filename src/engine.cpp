@@ -195,36 +195,36 @@ Engine::Engine(std::string map_name)
         else if (row == "p")
         {
             row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-            pacman = new Pacman(current_row, current_col, moves::UP);
-            row_vector[current_col].push(pacman);
+            characters[characters::game_characters::PACMAN] = new Pacman(current_row, current_col, moves::UP);
+            row_vector[current_col].push(characters[characters::game_characters::PACMAN]);
         }
         // blinky represents blinky
         else if (row == "blinky")
         {
             row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-            blinky = new Ghost(current_row, current_col, moves::LEFT, ghosts_types::BLINKY);
-            row_vector[current_col].push(blinky);
+            characters[characters::game_characters::BLINKY] = new Ghost(current_row, current_col, moves::LEFT, ghosts_types::BLINKY);
+            row_vector[current_col].push(characters[characters::game_characters::BLINKY]);
         }
         // pinky represents pinky
         else if (row == "pinky")
         {
             row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-            pinky = new Ghost(current_row, current_col, moves::RIGHT, ghosts_types::PINKY);
-            row_vector[current_col].push(pinky);
+            characters[characters::game_characters::PINKY] = new Ghost(current_row, current_col, moves::RIGHT, ghosts_types::PINKY);
+            row_vector[current_col].push(characters[characters::game_characters::PINKY]);
         }
         // inky represents inky
         else if (row == "inky")
         {
             row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-            inky = new Ghost(current_row, current_col, moves::UP, ghosts_types::INKY);
-            row_vector[current_col].push(inky);
+            characters[characters::game_characters::INKY] = new Ghost(current_row, current_col, moves::UP, ghosts_types::INKY);
+            row_vector[current_col].push(characters[characters::game_characters::INKY]);
         }
         // clyde represents clyde
         else if (row == "clyde")
         {
             row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-            clyde = new Ghost(current_row, current_col, moves::UP, ghosts_types::CLYDE);
-            row_vector[current_col].push(clyde);
+            characters[characters::game_characters::CLYDE] = new Ghost(current_row, current_col, moves::UP, ghosts_types::CLYDE);
+            row_vector[current_col].push(characters[characters::game_characters::CLYDE]);
         }
 
         // pp represents power pellet
@@ -298,27 +298,27 @@ Engine::Engine(std::string map_name)
         current_col++;
     }
 
-    ai = new AI{&board, &navigation, pacman, blinky, pinky, inky, clyde};
+    ai = new AI{&board, &navigation, characters};
 
     // Initilize the ghost's target tiles
-    if (blinky)
+    if (characters[characters::game_characters::BLINKY])
     {
-        blinky->set_target_tile(-3, board.get_cols() - 3);
+        static_cast<Ghost *>(characters[characters::game_characters::BLINKY])->set_target_tile(-3, board.get_cols() - 3);
     }
-    if (pinky)
+    if (characters[characters::game_characters::PINKY])
     {
-        pinky->set_target_tile(-3, 2);
+        static_cast<Ghost *>(characters[characters::game_characters::PINKY])->set_target_tile(-3, 2);
     }
-    if (inky)
+    if (characters[characters::game_characters::INKY])
     {
-        inky->set_target_tile(board.get_rows() + 1, board.get_cols());
+        static_cast<Ghost *>(characters[characters::game_characters::INKY])->set_target_tile(board.get_rows() + 1, board.get_cols());
     }
-    if (clyde)
+    if (characters[characters::game_characters::CLYDE])
     {
-        clyde->set_target_tile(board.get_rows() + 1, 0);
+        static_cast<Ghost *>(characters[characters::game_characters::CLYDE])->set_target_tile(board.get_rows() + 1, 0);
     }
 
-    if (!pacman)
+    if (!characters[characters::game_characters::PACMAN])
     {
         std::cout << "Error: Pacman must be placed on the map..." << std::endl;
         exit(1);
@@ -326,97 +326,34 @@ Engine::Engine(std::string map_name)
 }
 
 // Return a pointer to pacman
-Occupant *Engine::get_pacman()
+Occupant *Engine::get_character(int character)
 {
-    return pacman;
+    return characters[character];
 }
 
-// Return a pointer to blinky
-Occupant *Engine::get_blinky()
+// Return a pointer to the array that holds the characters (blinky, inky, pinky, clyde, and pacman)
+Occupant **Engine::get_all_characters()
 {
-    return blinky;
-}
-
-// Return a pointer to pinky
-Occupant *Engine::get_pinky()
-{
-    return pinky;
-}
-
-// Return a pointer to inky
-Occupant *Engine::get_inky()
-{
-    return inky;
-}
-
-// Return a pointer to clyde
-Occupant *Engine::get_clyde()
-{
-    return clyde;
+    return characters;
 }
 
 // Return whether or not pacman has collided with a ghost
 bool Engine::check_collision()
 {
-    if (blinky)
+    // Loop through each ghost
+    for (int i = 0; i < 4; i++)
     {
-        if (blinky->get_x_position() == pacman->get_x_position() && blinky->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::BLINKY) != ghost_states::HEADING_BACK)
+        // If the ghosts position is equal to pacmans position
+        if (characters[i]->get_x_position() == characters[characters::game_characters::PACMAN]->get_x_position() && characters[i]->get_y_position() == characters[characters::game_characters::PACMAN]->get_y_position())
         {
-            return true;
+            // And if the ghost has not already been eaten, then a collision has occured
+            if (state_manager.get_ghost_state(i) != ghost_states::HEADING_BACK)
+            {
+                return true;
+            }
         }
     }
-    if (pinky)
-    {
-        if (pinky->get_x_position() == pacman->get_x_position() && pinky->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::PINKY) != ghost_states::HEADING_BACK)
-        {
-            return true;
-        }
-    }
-    if (inky)
-    {
-        if (inky->get_x_position() == pacman->get_x_position() && inky->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::INKY) != ghost_states::HEADING_BACK)
-        {
-            return true;
-        }
-    }
-    if (clyde)
-    {
-        if (clyde->get_x_position() == pacman->get_x_position() && clyde->get_y_position() == pacman->get_y_position() && state_manager.get_ghost_state(ghosts_types::CLYDE) != ghost_states::HEADING_BACK)
-        {
-            return true;
-        }
-    }
-
     return false;
-}
-
-// Reset pacman and ghosts positions
-void Engine::reset_all_positions()
-{
-    // Pacman
-    (*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].pop_specific_occupant(pacman);
-    pacman->set_position(pacman->get_initial_x(), pacman->get_initial_y());
-    (*board.get_board())[pacman->get_x_position()][pacman->get_y_position()].push(pacman);
-
-    // Blinky
-    (*board.get_board())[blinky->get_x_position()][blinky->get_y_position()].pop_specific_occupant(blinky);
-    blinky->set_position(blinky->get_initial_x(), blinky->get_initial_y());
-    (*board.get_board())[blinky->get_x_position()][blinky->get_y_position()].push(blinky);
-
-    // Pinky
-    (*board.get_board())[pinky->get_x_position()][pinky->get_y_position()].pop_specific_occupant(pinky);
-    pinky->set_position(pinky->get_initial_x(), pinky->get_initial_y());
-    (*board.get_board())[pinky->get_x_position()][pinky->get_y_position()].push(pinky);
-
-    // Inky
-    (*board.get_board())[inky->get_x_position()][inky->get_y_position()].pop_specific_occupant(inky);
-    inky->set_position(inky->get_initial_x(), inky->get_initial_y());
-    (*board.get_board())[inky->get_x_position()][inky->get_y_position()].push(inky);
-
-    // Clyde
-    (*board.get_board())[clyde->get_x_position()][clyde->get_y_position()].pop_specific_occupant(clyde);
-    clyde->set_position(clyde->get_initial_x(), clyde->get_initial_y());
-    (*board.get_board())[clyde->get_x_position()][clyde->get_y_position()].push(clyde);
 }
 
 // Return a pointer to the board instance
