@@ -328,7 +328,7 @@ void Draw_Manager::ghost_animation(State_Manager *state_manager, Occupant *ghost
 }
 
 // Draw all moving ghosts
-void Draw_Manager::draw_all_ghost_animation(State_Manager *state_manager, Occupant *characters[5], Ghost_Clocks *ghost_clocks)
+void Draw_Manager::draw_all_ghost_animation(State_Manager *state_manager, Occupant **characters, Ghost_Clocks *ghost_clocks)
 {
     std::string names[4] = {"blinky", "pinky", "inky", "clyde"};
     for (int character = 0; character < 4; character++)
@@ -370,7 +370,7 @@ void Draw_Manager::draw_ghost(Occupant *ghost, float x, float y, std::string nam
 }
 
 // Draw all static ghosts
-void Draw_Manager::draw_all_ghosts(Occupant *characters[5])
+void Draw_Manager::draw_all_ghosts(Occupant **characters)
 {
     std::string names[4] = {"blinky", "pinky", "inky", "clyde"};
     for (int character = 0; character < 4; character++)

@@ -22,8 +22,8 @@ class Engine
 private:
     Occupant *characters[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
     Board board;
-    State_Manager state_manager;
-    Navigation navigation{&state_manager};
+    State_Manager *state_manager;
+    Navigation *navigation;
     AI *ai;
     Points points;
     Life_Manager life_manager{3};
@@ -32,6 +32,7 @@ private:
 
 public:
     Engine(std::string map_name);
+    ~Engine();
     Occupant *get_character(int character);
     Occupant **get_all_characters();
     bool check_collision();

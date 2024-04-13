@@ -298,7 +298,9 @@ Engine::Engine(std::string map_name)
         current_col++;
     }
 
-    ai = new AI{&board, &navigation, characters};
+    state_manager = new State_Manager;
+    navigation = new Navigation{state_manager};
+    ai = new AI{&board, navigation, characters};
 
     // Initilize the ghost's target tiles
     if (characters[characters::game_characters::BLINKY])
@@ -331,6 +333,14 @@ Occupant *Engine::get_character(int character)
     return characters[character];
 }
 
+Engine::~Engine()
+{
+    board.clear();
+    delete state_manager;
+    delete navigation;
+    delete ai;
+}
+
 // Return a pointer to the array that holds the characters (blinky, inky, pinky, clyde, and pacman)
 Occupant **Engine::get_all_characters()
 {
@@ -347,7 +357,7 @@ bool Engine::check_collision()
         if (characters[i]->get_x_position() == characters[characters::game_characters::PACMAN]->get_x_position() && characters[i]->get_y_position() == characters[characters::game_characters::PACMAN]->get_y_position())
         {
             // And if the ghost has not already been eaten, then a collision has occured
-            if (state_manager.get_ghost_state(i) != ghost_states::HEADING_BACK)
+            if (state_manager->get_ghost_state(i) != ghost_states::HEADING_BACK)
             {
                 return true;
             }
@@ -365,7 +375,7 @@ Board *Engine::get_board()
 // Return a pointer to the navigation instance
 Navigation *Engine::get_navigation()
 {
-    return &navigation;
+    return navigation;
 }
 
 // Return a pointer to the AI instance
@@ -389,5 +399,5 @@ Life_Manager *Engine::get_life_manager()
 // Return a pointer to the state manager instance
 State_Manager *Engine::get_state_manager()
 {
-    return &state_manager;
+    return state_manager;
 }

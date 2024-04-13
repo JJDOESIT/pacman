@@ -33,6 +33,7 @@ private:
 
 public:
     AI(Board *b, Navigation *n, Occupant *characters[5]);
+    ~AI();
     void move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_clocks, int ghost);
     void move_all(State_Manager *state_manager, Ghost_Clocks *ghost_clocks);
 };

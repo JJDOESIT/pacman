@@ -46,9 +46,9 @@ public:
     void draw_board(std::vector<std::vector<Occupant_List>> *board);
     void pacman_animation(Occupant *pacman, int x, int y, int target_x, int target_y, int direction, float tick);
 
-    void draw_all_ghost_animation(State_Manager *state_manager, Occupant *characters[5], Ghost_Clocks *ghost_clocks);
+    void draw_all_ghost_animation(State_Manager *state_manager, Occupant **characters, Ghost_Clocks *ghost_clocks);
 
-    void draw_all_ghosts(Occupant *characters[5]);
+    void draw_all_ghosts(Occupant **characters);
 
     void draw_score(Points *p);
 

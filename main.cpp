@@ -54,6 +54,9 @@ int main()
 
         player_animation_clock.update();
         e.get_state_manager()->update_mode();
+        e.get_state_manager()->update_states();
+
+        // std::cout << e.get_state_manager()->get_ghost_state(ghosts_types::PINKY) << std::endl;
 
         // If pacman has moved over one coin on on the screen (pacman is drawn ahead before he is moved internally)
         if (player_clock.need_restart())
@@ -71,6 +74,9 @@ int main()
                 if (powerup == power_types::POWER_PELLET)
                 {
                     e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
+                    ghost_clocks.set_threshold_all(400);
+                    e.get_state_manager()->get_ghost_mode_clock()->delay_a_function([&]()
+                                                                                    { ghost_clocks.set_threshold_all(200); });
                 }
                 buffer_direction = intended_direction;
             }
@@ -93,6 +99,9 @@ int main()
                 if (powerup == power_types::POWER_PELLET)
                 {
                     e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
+                    ghost_clocks.set_threshold_all(400);
+                    e.get_state_manager()->get_ghost_mode_clock()->delay_a_function([&]()
+                                                                                    { ghost_clocks.set_threshold_all(200); });
                 }
 
                 // Recheck if pacman is able to move his intended direction

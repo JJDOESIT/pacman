@@ -26,3 +26,12 @@ void Ghost_Clocks::restart_all()
         clocks[i]->restart();
     }
 }
+
+// Set the threshold of all clocks
+void Ghost_Clocks::set_threshold_all(float time)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        clocks[i]->set_threshold(time);
+    }
+}

@@ -11,6 +11,10 @@ AI::AI(Board *b, Navigation *n, Occupant *characters[5])
     AI::characters[characters::PACMAN] = characters[characters::PACMAN];
 }
 
+AI::~AI()
+{
+}
+
 // Calculate the euclidean distance between two given points
 int AI::euclidean_distance(int x1, int y1, int x2, int y2)
 {
@@ -258,7 +262,7 @@ void AI::move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_c
     Occupant *occupant = characters[ghost];
 
     // If the ghost is not nullptr
-    if (occupant)
+    if (occupant && state_manager->get_ghost_state(ghost) != ghost_states::DISABLED)
     {
         // If the ghost is escaping the den
         if (state_manager->get_ghost_state(ghost) == ghost_states::ESCAPING)
@@ -284,7 +288,8 @@ void AI::move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_c
             {
                 // Move them once more in their current direction
                 move_in_current_direction(ghost);
-                state_manager->set_ghost_state(ghost, ghost_states::DISABLED);
+                state_manager->set_ghost_state(ghost, ghost_states::ESCAPING);
+                state_manager->overide_state(7000, ghost_states::DISABLED, ghost);
                 ghost_clocks->clocks[ghost]->set_threshold(ghost_clocks->clocks[ghost]->get_initial_time());
             }
             // Else if the ghost is still heading back

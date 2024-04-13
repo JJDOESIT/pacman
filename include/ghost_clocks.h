@@ -12,6 +12,7 @@ public:
     Ghost_Clocks(float inital_time);
     void update_all();
     void restart_all();
+    void set_threshold_all(float time);
 };
 
 #endif

@@ -13,6 +13,7 @@ private:
 
 public:
     std::vector<std::vector<Occupant_List>> *get_board();
+    void clear();
     int get_rows();
     int get_cols();
     void set_rows(int n);

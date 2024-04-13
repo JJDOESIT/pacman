@@ -253,7 +253,7 @@ void Navigation::reset_position(Board *board, Occupant *occupant)
 }
 
 // Reset all positions
-void Navigation::reset_all_positions(Board *board, Occupant *characters[5])
+void Navigation::reset_all_positions(Board *board, Occupant **characters)
 {
     if (characters[characters::PACMAN])
     {

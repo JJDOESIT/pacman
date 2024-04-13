@@ -31,6 +31,13 @@ void Clock::restart()
 {
     tick = 0;
     time = 0;
+    c.restart();
+
+    if (delayed_function)
+    {
+        delayed_function();
+    }
+    delayed_function = nullptr;
 }
 
 // Set the threshold
@@ -73,4 +80,9 @@ float Clock::get_initial_time()
 bool Clock::need_restart()
 {
     return time >= threshold;
+}
+
+void Clock::delay_a_function(std::function<void()> f)
+{
+    delayed_function = f;
 }

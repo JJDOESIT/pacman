@@ -1,4 +1,6 @@
 #include "SFML/Graphics.hpp"
+#include <functional>
+#include <iostream>
 
 #ifndef _CLOCK_
 #define _CLOCK_
@@ -13,6 +15,7 @@ private:
     float total_time;
     sf::Clock c;
     sf::Time dt;
+    std::function<void()> delayed_function;
 
 public:
     Clock(float t);
@@ -26,6 +29,7 @@ public:
     float get_threshold();
     float get_initial_time();
     bool need_restart();
+    void delay_a_function(std::function<void()> f);
 };
 
 #endif

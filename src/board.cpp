@@ -30,6 +30,21 @@ std::vector<std::vector<Occupant_List>> *Board::get_board()
     return &board;
 }
 
+// Delete the board
+void Board::clear()
+{
+    for (int row = 0; row < nRows; row++)
+    {
+        for (int col = 0; col < nCols; col++)
+        {
+            for (int occupant; occupant < board[row][col].get_oc_list().size(); occupant++)
+            {
+                delete board[row][col].get_oc_list()[occupant];
+            }
+        }
+    }
+}
+
 // Print the board state
 void Board::print_board()
 {
