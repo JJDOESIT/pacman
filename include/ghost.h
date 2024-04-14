@@ -9,6 +9,7 @@ private:
     int type;
     int mode = 0;
     int initial_position[2] = {-1, -1};
+    int initial_direction;
     int target_tile[2] = {-1, -1};
     int best_move[2] = {-1, -1};
 
@@ -19,6 +20,7 @@ public:
     int get_mode();
     int get_initial_x();
     int get_initial_y();
+    int get_initial_direction();
     int get_target_x_tile();
     int get_target_y_tile();
     int get_best_x_tile();

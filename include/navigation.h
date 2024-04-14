@@ -26,7 +26,7 @@ public:
     void move_occupant(Occupant *occupant, Board *board, int direction, Points *points = nullptr, int *powerup = nullptr);
     void move(Occupant *occupant, Board *board, int direction, Points *points = nullptr, int *powerup = nullptr);
 
-    void reset_all_positions(Board *board, Occupant **characters);
+    void reset_all_characters(Board *board, Occupant **characters);
 };
 
 #endif

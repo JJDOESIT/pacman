@@ -21,7 +21,7 @@ public:
     Clock(float t);
     void update();
     void update(float n);
-    void restart();
+    void restart(bool function_activation = true);
     void set_threshold(float t);
     float get_tick();
     float get_time();
@@ -30,6 +30,7 @@ public:
     float get_initial_time();
     bool need_restart();
     void delay_a_function(std::function<void()> f);
+    void reset();
 };
 
 #endif

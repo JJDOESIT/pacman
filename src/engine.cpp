@@ -298,7 +298,7 @@ Engine::Engine(std::string map_name)
         current_col++;
     }
 
-    state_manager = new State_Manager;
+    state_manager = new State_Manager{ghost_states::ESCAPING};
     navigation = new Navigation{state_manager};
     ai = new AI{&board, navigation, characters};
 

@@ -1,7 +1,7 @@
 #include "engine.h"
 #include "draw_manager.h"
 #include "clock.h"
-#include "ghost_clocks.h"
+#include "speed_manager.h"
 #include "SFML/Graphics.hpp"
 #include "linear_directions.h"
 
@@ -31,7 +31,7 @@ int main()
 
     const float INITIAL_GHOST_TIME = 300;
 
-    Ghost_Clocks ghost_clocks(300);
+    Speed_Manager speed_manager(e.get_state_manager(), 300);
     Clock player_clock(200);
     Clock player_animation_clock(100);
 
@@ -42,7 +42,7 @@ int main()
     int buffer_direction = e.get_character(characters::PACMAN)->get_direction();
     int intended_direction = buffer_direction;
 
-    e.get_ai()->move_all(e.get_state_manager(), &ghost_clocks);
+    e.get_ai()->move_all(e.get_state_manager(), &speed_manager);
 
     while (window.isOpen())
     {
@@ -50,7 +50,7 @@ int main()
 
         // Update all the clocks
         player_clock.update();
-        ghost_clocks.update_all();
+        speed_manager.update_all();
 
         player_animation_clock.update();
         e.get_state_manager()->update_mode();
@@ -71,12 +71,32 @@ int main()
                 // Move pacman in the intended direction and set his buffer_direction to face the same way
                 int powerup = -1;
                 e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), intended_direction, e.get_points(), &powerup);
+
+                // If a power pellet was eaten
                 if (powerup == power_types::POWER_PELLET)
                 {
+                    // Set the ghost mode to frightened
+
+                    // If a ghost was not already eaten, set its speed to slow down
+                    for (int ghost = 0; ghost < 4; ghost++)
+                    {
+                        if (e.get_state_manager()->get_ghost_state(ghost) != ghost_states::HEADING_BACK)
+                        {
+                            if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
+                            {
+                                speed_manager.set_threshold(ghost, 400);
+                                e.get_state_manager()->get_ghost_state_clock(ghost)->restart();
+                                e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(10000);
+                                e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &speed_manager]()
+                                                                                                      { speed_manager.update_ghost_speed(ghost, speed_manager.get_initial_time()); });
+                            }
+                            else
+                            {
+                                e.get_state_manager()->get_ghost_state_clock(ghost)->restart(false);
+                            }
+                        }
+                    }
                     e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
-                    ghost_clocks.set_threshold_all(400);
-                    e.get_state_manager()->get_ghost_mode_clock()->delay_a_function([&]()
-                                                                                    { ghost_clocks.set_threshold_all(200); });
                 }
                 buffer_direction = intended_direction;
             }
@@ -96,12 +116,28 @@ int main()
                 // Move pacman over a tile
                 int powerup = -1;
                 e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), buffer_direction, e.get_points(), &powerup);
+                // If a power pellet was eaten
                 if (powerup == power_types::POWER_PELLET)
                 {
+                    // Set the ghost mode to frightened
                     e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
-                    ghost_clocks.set_threshold_all(400);
-                    e.get_state_manager()->get_ghost_mode_clock()->delay_a_function([&]()
-                                                                                    { ghost_clocks.set_threshold_all(200); });
+
+                    // If a ghost was not already eaten, set its speed to slow down
+                    for (int ghost = 0; ghost < 4; ghost++)
+                    {
+                        if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
+                        {
+                            speed_manager.set_threshold(ghost, 400);
+                            e.get_state_manager()->get_ghost_state_clock(ghost)->restart();
+                            e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(10000);
+                            e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &speed_manager]()
+                                                                                                  { speed_manager.update_ghost_speed(ghost, speed_manager.get_initial_time()); });
+                        }
+                        else
+                        {
+                            e.get_state_manager()->get_ghost_state_clock(ghost)->restart(false);
+                        }
+                    }
                 }
 
                 // Recheck if pacman is able to move his intended direction
@@ -139,10 +175,10 @@ int main()
             {
                 // Decrease lives by one, restart their clocks, reset all positions and states
                 e.get_life_manager()->decrement();
-                ghost_clocks.restart_all();
+                speed_manager.reset_all();
                 player_clock.restart();
-                e.get_navigation()->reset_all_positions(e.get_board(), e.get_all_characters());
-                e.get_state_manager()->set_all_ghost_states(ghost_states::ESCAPING);
+                e.get_navigation()->reset_all_characters(e.get_board(), e.get_all_characters());
+                e.get_state_manager()->reset();
             }
             else
             {
@@ -150,7 +186,7 @@ int main()
                 for (Occupant *occupant : occupants)
                 {
                     e.get_state_manager()->set_ghost_state(static_cast<Ghost *>(occupant)->get_type(), ghost_states::HEADING_BACK);
-                    ghost_clocks.clocks[static_cast<Ghost *>(occupant)->get_type()]->set_threshold(150);
+                    speed_manager.set_threshold(static_cast<Ghost *>(occupant)->get_type(), 150);
                 }
             }
         }
@@ -163,7 +199,7 @@ int main()
         for (int ghost = 0; ghost < 4; ghost++)
         {
             // If the ghosts has moved one coin over
-            if (ghost_clocks.clocks[ghost]->need_restart())
+            if (speed_manager.ghost_clocks[ghost]->need_restart())
             {
                 // Move the ghosts corresponding to their internal direction
                 if (e.get_character(ghost))
@@ -171,9 +207,9 @@ int main()
                     e.get_navigation()->move(e.get_character(ghost), e.get_board(), e.get_character(ghost)->get_direction());
 
                     // Calculate the ghosts new direction given their current state
-                    e.get_ai()->move_based_on_state(e.get_state_manager(), &ghost_clocks, ghost);
+                    e.get_ai()->move_based_on_state(e.get_state_manager(), &speed_manager, ghost);
 
-                    ghost_clocks.clocks[ghost]->restart();
+                    speed_manager.ghost_clocks[ghost]->restart();
                 }
             }
         }
@@ -278,7 +314,7 @@ int main()
         // If there is no collision or if the ghosts are frightened, draw lerping animation
         if (!e.get_life_manager()->get_collision() || e.get_state_manager()->get_ghost_mode() == ghost_modes::FRIGHTENED)
         {
-            d.draw_all_ghost_animation(e.get_state_manager(), e.get_all_characters(), &ghost_clocks);
+            d.draw_all_ghost_animation(e.get_state_manager(), e.get_all_characters(), &speed_manager);
 
             // If a collision occured, set the collision to false
             if (e.get_life_manager()->get_collision())
@@ -291,7 +327,7 @@ int main()
         {
             d.draw_all_ghosts(e.get_all_characters());
 
-            e.get_ai()->move_all(e.get_state_manager(), &ghost_clocks);
+            e.get_ai()->move_all(e.get_state_manager(), &speed_manager);
 
             e.get_life_manager()->set_collision(false);
         }

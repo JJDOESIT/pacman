@@ -4,7 +4,7 @@
 #include "ghost.h"
 #include "linear_directions.h"
 #include "state_manager.h"
-#include "ghost_clocks.h"
+#include "speed_manager.h"
 
 #include <cmath>
 
@@ -34,8 +34,8 @@ private:
 public:
     AI(Board *b, Navigation *n, Occupant *characters[5]);
     ~AI();
-    void move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_clocks, int ghost);
-    void move_all(State_Manager *state_manager, Ghost_Clocks *ghost_clocks);
+    void move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost);
+    void move_all(State_Manager *state_manager, Speed_Manager *speed_manager);
 };
 
 #endif

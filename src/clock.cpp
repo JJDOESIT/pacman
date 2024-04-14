@@ -27,17 +27,17 @@ void Clock::update(float n)
 }
 
 // Reset the tick, and time
-void Clock::restart()
+void Clock::restart(bool function_activation)
 {
     tick = 0;
     time = 0;
     c.restart();
 
-    if (delayed_function)
+    if (delayed_function && function_activation)
     {
         delayed_function();
+        delayed_function = nullptr;
     }
-    delayed_function = nullptr;
 }
 
 // Set the threshold
@@ -85,4 +85,13 @@ bool Clock::need_restart()
 void Clock::delay_a_function(std::function<void()> f)
 {
     delayed_function = f;
+}
+
+// Reset the clock completely
+void Clock::reset()
+{
+    tick = 0;
+    time = 0;
+    total_time = 0;
+    delayed_function = nullptr;
 }

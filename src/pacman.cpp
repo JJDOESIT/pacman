@@ -7,6 +7,7 @@ Pacman::Pacman(int x, int y, int d)
     Occupant::set_direction(d);
     initial_position[0] = x;
     initial_position[1] = y;
+    initial_direction = d;
 }
 
 // Return the initial x position of pacman
@@ -19,6 +20,12 @@ int Pacman::get_initial_x()
 int Pacman::get_initial_y()
 {
     return initial_position[1];
+}
+
+// Return pacman's initial direction
+int Pacman::get_initial_direction()
+{
+    return initial_direction;
 }
 
 // Set pacman's animation state

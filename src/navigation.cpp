@@ -252,27 +252,19 @@ void Navigation::reset_position(Board *board, Occupant *occupant)
     }
 }
 
-// Reset all positions
-void Navigation::reset_all_positions(Board *board, Occupant **characters)
+// Reset the position and direction of the characters
+void Navigation::reset_all_characters(Board *board, Occupant **characters)
 {
-    if (characters[characters::PACMAN])
+    for (int character = 0; character < 5; character++)
     {
-        reset_position(board, characters[characters::PACMAN]);
-    }
-    if (characters[characters::BLINKY])
-    {
-        reset_position(board, characters[characters::BLINKY]);
-    }
-    if (characters[characters::PINKY])
-    {
-        reset_position(board, characters[characters::PINKY]);
-    }
-    if (characters[characters::INKY])
-    {
-        reset_position(board, characters[characters::INKY]);
-    }
-    if (characters[characters::CLYDE])
-    {
-        reset_position(board, characters[characters::CLYDE]);
+        reset_position(board, characters[character]);
+        if (character == characters::PACMAN)
+        {
+            characters[character]->set_direction(static_cast<Pacman *>(characters[character])->get_initial_direction());
+        }
+        else
+        {
+            characters[character]->set_direction(static_cast<Ghost *>(characters[character])->get_initial_direction());
+        }
     }
 }

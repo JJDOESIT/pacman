@@ -1,5 +1,10 @@
 #include "state_manager.h"
 
+State_Manager::State_Manager(int initial_state)
+{
+    State_Manager::initial_state = initial_state;
+}
+
 // Push a timing and ghost mode into the list
 void State_Manager::push(int timing, int mode)
 {
@@ -54,14 +59,10 @@ void State_Manager::update_states()
 {
     for (int i = 0; i < 4; i++)
     {
-        if (ghost_state_overides[i] != -1)
+        ghost_state_clocks[i].update();
+        if (ghost_state_clocks[i].need_restart())
         {
-            ghost_state_clocks[i].update();
-            if (ghost_state_clocks[i].need_restart())
-            {
-                ghost_state_overides[i] = -1;
-                ghost_state_clocks[i].restart();
-            }
+            ghost_state_clocks[i].restart();
         }
     }
 }
@@ -75,15 +76,7 @@ void State_Manager::set_ghost_state(int ghost, int state)
 // Return the state of the given ghost (escaping, free, or disabled, or heading back)
 int State_Manager::get_ghost_state(int ghost)
 {
-    return ghost_state_overides[ghost] == -1 ? ghost_states[ghost] : ghost_state_overides[ghost];
-}
-
-// Overide the current state for a set amount of time in milliseconds
-void State_Manager::overide_state(int timing, int state, int ghost)
-{
-    ghost_state_overides[ghost] = state;
-    ghost_state_clocks[ghost].set_threshold(timing);
-    ghost_state_clocks[ghost].restart();
+    return ghost_states[ghost];
 }
 
 // Set the state of all ghosts
@@ -93,6 +86,11 @@ void State_Manager::set_all_ghost_states(int state)
     set_ghost_state(ghosts_types::PINKY, state);
     set_ghost_state(ghosts_types::INKY, state);
     set_ghost_state(ghosts_types::CLYDE, state);
+}
+
+Clock *State_Manager::get_ghost_state_clock(int ghost)
+{
+    return &ghost_state_clocks[ghost];
 }
 
 // Set the escape tile of the given ghost
@@ -118,4 +116,17 @@ int State_Manager::get_ghost_escape_y(int ghost)
 bool State_Manager::has_escaped(Occupant *ghost)
 {
     return ghost_escape_tiles[static_cast<Ghost *>(ghost)->get_type()][0] == ghost->get_x_position() && ghost_escape_tiles[static_cast<Ghost *>(ghost)->get_type()][1] == ghost->get_y_position();
+}
+
+// Reset the states of all ghosts
+void State_Manager::reset()
+{
+    for (int ghost = 0; ghost < 4; ghost++)
+    {
+        ghost_state_clocks[ghost].reset();
+        ghost_states[ghost] = initial_state;
+    }
+    ghost_mode_clock.reset();
+    mode_index = 0;
+    overide_ghost_mode = -1;
 }

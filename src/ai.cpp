@@ -257,7 +257,7 @@ void AI::return_to_start(State_Manager *state_manager, int ghost)
 }
 
 // Move ghosts based on their current state and mode
-void AI::move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_clocks, int ghost)
+void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost)
 {
     Occupant *occupant = characters[ghost];
 
@@ -288,9 +288,12 @@ void AI::move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_c
             {
                 // Move them once more in their current direction
                 move_in_current_direction(ghost);
-                state_manager->set_ghost_state(ghost, ghost_states::ESCAPING);
-                state_manager->overide_state(7000, ghost_states::DISABLED, ghost);
-                ghost_clocks->clocks[ghost]->set_threshold(ghost_clocks->clocks[ghost]->get_initial_time());
+                state_manager->set_ghost_state(ghost, ghost_states::DISABLED);
+                speed_manager->ghost_clocks[ghost]->set_threshold(speed_manager->ghost_clocks[ghost]->get_initial_time());
+                state_manager->get_ghost_state_clock(ghost)->set_threshold(5000);
+                state_manager->get_ghost_state_clock(ghost)->restart();
+                state_manager->get_ghost_state_clock(ghost)->delay_a_function([state_manager, ghost]()
+                                                                              { state_manager->set_ghost_state(ghost, ghost_states::ESCAPING); });
             }
             // Else if the ghost is still heading back
             else
@@ -342,10 +345,10 @@ void AI::move_based_on_state(State_Manager *state_manager, Ghost_Clocks *ghost_c
 }
 
 // Move all ghosts
-void AI::move_all(State_Manager *state_manager, Ghost_Clocks *ghost_clocks)
+void AI::move_all(State_Manager *state_manager, Speed_Manager *speed_manager)
 {
-    move_based_on_state(state_manager, ghost_clocks, ghosts_types::BLINKY);
-    move_based_on_state(state_manager, ghost_clocks, ghosts_types::PINKY);
-    move_based_on_state(state_manager, ghost_clocks, ghosts_types::INKY);
-    move_based_on_state(state_manager, ghost_clocks, ghosts_types::CLYDE);
+    move_based_on_state(state_manager, speed_manager, ghosts_types::BLINKY);
+    move_based_on_state(state_manager, speed_manager, ghosts_types::PINKY);
+    move_based_on_state(state_manager, speed_manager, ghosts_types::INKY);
+    move_based_on_state(state_manager, speed_manager, ghosts_types::CLYDE);
 }
