@@ -401,3 +401,9 @@ State_Manager *Engine::get_state_manager()
 {
     return state_manager;
 }
+
+// Return a pointer to the map editor instance
+Map_Editor *Engine::get_map_editor()
+{
+    return &map_editor;
+}

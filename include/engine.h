@@ -10,6 +10,7 @@
 #include "life_manager.h"
 #include "state_manager.h"
 #include "power.h"
+#include "map_editor.h"
 
 #include <fstream>
 #include <vector>
@@ -27,8 +28,8 @@ private:
     AI *ai;
     Points points;
     Life_Manager life_manager{3};
-
     std::vector<Portal *> portals;
+    Map_Editor map_editor;
 
 public:
     Engine(std::string map_name);
@@ -42,6 +43,7 @@ public:
     Points *get_points();
     Life_Manager *get_life_manager();
     State_Manager *get_state_manager();
+    Map_Editor *get_map_editor();
 };
 
 #endif

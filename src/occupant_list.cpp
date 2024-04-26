@@ -41,6 +41,18 @@ void Occupant_List::pop_specific_occupant(Occupant *occupant)
     }
 }
 
+// Clear the occupant list
+void Occupant_List::clear()
+{
+    int count = 0;
+    while (count < oc_list.size())
+    {
+        delete oc_list[count];
+        oc_list.pop_back();
+        count++;
+    }
+}
+
 // Return a vector of all the occupants of the given type
 std::vector<Occupant *> Occupant_List::get_all_occupants(int type)
 {

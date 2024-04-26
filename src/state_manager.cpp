@@ -88,6 +88,7 @@ void State_Manager::set_all_ghost_states(int state)
     set_ghost_state(ghosts_types::CLYDE, state);
 }
 
+// Return the state of the given ghost
 Clock *State_Manager::get_ghost_state_clock(int ghost)
 {
     return &ghost_state_clocks[ghost];
