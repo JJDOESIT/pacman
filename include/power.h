@@ -1,7 +1,7 @@
-#include "occupant.h"
-
 #ifndef _POWER_
 #define _POWER_
+
+#include "occupant.h"
 
 class Power : public Occupant
 {

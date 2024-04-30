@@ -1,0 +1,163 @@
+{
+    "tiles": {
+        "stlc": {
+            "type": 2,
+            "specific_type": 0
+        },
+        "strc": {
+            "type": 2,
+            "specific_type": 1
+        },
+        "sblc": {
+            "type": 2,
+            "specific_type": 2
+        },
+        "sbrc": {
+            "type": 2,
+            "specific_type": 3
+        },
+        "trcc": {
+            "type": 2,
+            "specific_type": 4
+        },
+        "tlcc": {
+            "type": 2,
+            "specific_type": 5
+        },
+        "tlccv": {
+            "type": 2,
+            "specific_type": 6
+        },
+        "trccv": {
+            "type": 2,
+            "specific_type": 7
+        },
+        "blccv": {
+            "type": 2,
+            "specific_type": 8
+        },
+        "brccv": {
+            "type": 2,
+            "specific_type": 9
+        },
+        "tlcd": {
+            "type": 2,
+            "specific_type": 10
+        },
+        "trcd": {
+            "type": 2,
+            "specific_type": 11
+        },
+        "brcd": {
+            "type": 2,
+            "specific_type": 12
+        },
+        "blcd": {
+            "type": 2,
+            "specific_type": 13
+        },
+        "tlcs": {
+            "type": 2,
+            "specific_type": 14
+        },
+        "trcs": {
+            "type": 2,
+            "specific_type": 15
+        },
+        "brcs": {
+            "type": 2,
+            "specific_type": 16
+        },
+        "blcs": {
+            "type": 2,
+            "specific_type": 17
+        },
+        "tlcsc": {
+            "type": 2,
+            "specific_type": 18
+        },
+        "trcsc": {
+            "type": 2,
+            "specific_type": 19
+        },
+        "brcsc": {
+            "type": 2,
+            "specific_type": 20
+        },
+        "blcsc": {
+            "type": 2,
+            "specific_type": 21
+        },
+        "svld": {
+            "type": 2,
+            "specific_type": 22
+        },
+        "svrd": {
+            "type": 2,
+            "specific_type": 23
+        },
+        "svml": {
+            "type": 2,
+            "specific_type": 24
+        },
+        "svmr": {
+            "type": 2,
+            "specific_type": 25
+        },
+        "shtd": {
+            "type": 2,
+            "specific_type": 26
+        },
+        "shbd": {
+            "type": 2,
+            "specific_type": 27
+        },
+        "shts": {
+            "type": 2,
+            "specific_type": 28
+        },
+        "shbs": {
+            "type": 2,
+            "specific_type": 29
+        },
+        "f": {
+            "type": 2,
+            "specific_type": 30
+        },
+        "gate": {
+            "type": 2,
+            "specific_type": 31
+        },
+        "c": {
+            "type": 3,
+            "toggled": 1
+        },
+        "s": {
+            "type": 3,
+            "toggled": 0
+        },
+        "blinky": {
+            "type": 1,
+            "specific_type": 0
+        },
+        "pinky": {
+            "type": 1,
+            "specific_type": 1
+        },
+        "inky": {
+            "type": 1,
+            "specific_type": 2
+        },
+        "clyde": {
+            "type": 1,
+            "specific_type": 3
+        },
+        "pp": {
+            "type": 5,
+            "specific_type": 0
+        },
+        "p": {
+            "type": 0
+        }
+    }
+}

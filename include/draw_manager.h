@@ -1,3 +1,6 @@
+#ifndef _DRAW_MANAGER_
+#define _DRAW_MANAGER_
+
 #include "texture_manager.h"
 #include "occupant_list.h"
 #include "wall.h"
@@ -12,12 +15,10 @@
 #include "speed_manager.h"
 #include "tile.h"
 #include "config.h"
+#include "json.h"
 
 #include <iostream>
 #include <string>
-
-#ifndef _DRAW_MANAGER_
-#define _DRAW_MANAGER_
 
 class Draw_Manager
 {

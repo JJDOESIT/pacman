@@ -9,8 +9,10 @@
 #include "points.h"
 #include "life_manager.h"
 #include "state_manager.h"
+#include "speed_manager.h"
 #include "power.h"
 #include "map_editor.h"
+#include "json.h"
 
 #include <fstream>
 #include <vector>
@@ -29,6 +31,7 @@ private:
     Points points;
     Life_Manager life_manager{3};
     std::vector<Portal *> portals;
+    Speed_Manager *speed_manager;
     Map_Editor map_editor;
 
 public:
@@ -43,7 +46,11 @@ public:
     Points *get_points();
     Life_Manager *get_life_manager();
     State_Manager *get_state_manager();
+    Speed_Manager *get_speed_manager();
     Map_Editor *get_map_editor();
+    void text_to_array(std::string map_name);
+    void reset();
+    void initilize(std::string map_name);
 };
 
 #endif

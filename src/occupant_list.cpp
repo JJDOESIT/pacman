@@ -45,7 +45,7 @@ void Occupant_List::pop_specific_occupant(Occupant *occupant)
 void Occupant_List::clear()
 {
     int count = 0;
-    while (count < oc_list.size())
+    while (count < oc_list.size() + count)
     {
         delete oc_list[count];
         oc_list.pop_back();
@@ -82,17 +82,6 @@ Occupant *Occupant_List::find_occupant(int type)
         count++;
     }
     return nullptr;
-}
-
-// Print the occupant list
-void Occupant_List::print_occupant_list()
-{
-    int count = 0;
-    while (count < oc_list.size())
-    {
-        oc_list[count]->print_type();
-        count++;
-    }
 }
 
 // Return the ocupant list

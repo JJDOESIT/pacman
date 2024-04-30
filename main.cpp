@@ -4,19 +4,20 @@
 #include "speed_manager.h"
 #include "SFML/Graphics.hpp"
 #include "linear_directions.h"
+#include "config.h"
 
 int main()
 {
-    Engine e("map.txt");
+    Engine e(Config::MAP_DIR + "map0.txt");
 
-    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, HEADER_HEIGHT + BODY_HEIGHT + FOOTER_HEIGHT), "Pac-Man");
+    sf::RenderWindow window(sf::VideoMode(Config::SCREEN_WIDTH, Config::HEADER_HEIGHT + Config::BODY_HEIGHT + Config::FOOTER_HEIGHT), "Pac-Man");
     sf::RenderTexture body;
     sf::RenderTexture header;
     sf::RenderTexture footer;
 
-    header.create(SCREEN_WIDTH, HEADER_HEIGHT);
-    body.create(SCREEN_WIDTH, BODY_HEIGHT);
-    footer.create(SCREEN_WIDTH, FOOTER_HEIGHT);
+    header.create(Config::SCREEN_WIDTH, Config::HEADER_HEIGHT);
+    body.create(Config::SCREEN_WIDTH, Config::BODY_HEIGHT);
+    footer.create(Config::SCREEN_WIDTH, Config::FOOTER_HEIGHT);
 
     Draw_Manager d(window, header, body, footer, e.get_board()->get_rows(), e.get_board()->get_cols());
 
@@ -26,24 +27,14 @@ int main()
 
     sf::Event event;
 
-    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::BLINKY, 12, 13);
-    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::PINKY, 12, 14);
-    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::INKY, 12, 13);
-    e.get_state_manager()->set_ghost_escape_tile(ghosts_types::CLYDE, 12, 14);
-
-    const float INITIAL_GHOST_TIME = 300;
-
-    Speed_Manager speed_manager(e.get_state_manager(), 200, 300);
     Clock player_animation_clock(100);
-
-    e.get_state_manager()->push(7000, ghost_modes::SCATTER);
-    e.get_state_manager()->push(20000, ghost_modes::CHASE);
 
     bool is_stopped = false;
     int buffer_direction = e.get_character(characters::PACMAN)->get_direction();
     int intended_direction = buffer_direction;
 
-    e.get_ai()->move_all(e.get_state_manager(), &speed_manager);
+    e.get_ai()->move_all(e.get_state_manager(), e.get_speed_manager());
+    std::cout << e.get_character(2)->get_y_position() << ", " << static_cast<Ghost *>(e.get_character(2))->get_best_y_tile() << std::endl;
 
     while (window.isOpen())
     {
@@ -52,31 +43,51 @@ int main()
             e.get_points()->stringify();
 
             // Update all the clocks
-            speed_manager.update_all();
+            e.get_speed_manager()->update_all();
             player_animation_clock.update();
             e.get_state_manager()->update_mode();
             e.get_state_manager()->update_states();
 
-            // std::cout << e.get_state_manager()->get_ghost_state(ghosts_types::PINKY) << std::endl;
-
             // If pacman has moved over one coin on on the screen (pacman is drawn ahead before he is moved internally)
-            if (speed_manager.pacman_clock->need_restart())
+            if (e.get_speed_manager()->pacman_clock->need_restart())
             {
-                speed_manager.pacman_clock->restart();
+                e.get_speed_manager()->pacman_clock->restart();
 
                 bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
 
-                // If pacman is able to move in the intended direction, and pacman is not trying to reverse in-between cells
-                if (moves[intended_direction] && e.get_character(characters::PACMAN)->get_direction() == buffer_direction)
+                // Else if pacman is trying to reverse between cells
+                // ie. Pacman internally is moving right, but on screen moving left
+                if (e.get_character(characters::PACMAN)->get_direction() != buffer_direction)
                 {
-                    // Move pacman in the intended direction and set his buffer_direction to face the same way
-                    int powerup = -1;
-                    e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), intended_direction, e.get_points(), &powerup);
+                    // Set pacman's internal direction to the buffer direction
+                    // Note: This is because this means pacman has successfully turned around and reached
+                    //       original starting position. When we update his internal position to reflect this,
+                    //       his target tile will now be the correct tile.
+                    e.get_character(characters::PACMAN)->set_direction(buffer_direction);
+                }
+                else
+                {
+                    int direction;
 
+                    // If pacman is able to move in the intended direction, and pacman is not trying to reverse in-between cells
+                    if (moves[intended_direction] && e.get_character(characters::PACMAN)->get_direction() == buffer_direction)
+                    {
+                        direction = intended_direction;
+                    }
+                    // Else if pacman is moving along a straight path
+                    else
+                    {
+                        direction = buffer_direction;
+                    }
+
+                    // Move pacman
+                    int powerup = -1;
+                    e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), direction, e.get_points(), &powerup);
                     // If a power pellet was eaten
                     if (powerup == power_types::POWER_PELLET)
                     {
                         // Set the ghost mode to frightened
+                        e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
 
                         // If a ghost was not already eaten, set its speed to slow down
                         for (int ghost = 0; ghost < 4; ghost++)
@@ -85,11 +96,11 @@ int main()
                             {
                                 if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
                                 {
-                                    speed_manager.set_threshold(ghost, 400);
+                                    e.get_speed_manager()->set_threshold(ghost, 400);
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->restart();
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(10000);
-                                    e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &speed_manager]()
-                                                                                                          { speed_manager.update_ghost_speed(ghost, speed_manager.get_initial_time(type::GHOST)); });
+                                    e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &e]()
+                                                                                                          { e.get_speed_manager()->update_ghost_speed(ghost, e.get_speed_manager()->get_initial_time(type::GHOST)); });
                                 }
                                 else
                                 {
@@ -98,47 +109,6 @@ int main()
                             }
                         }
                         e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
-                    }
-                    buffer_direction = intended_direction;
-                }
-                // Else if pacman is trying to reverse between cells
-                // ie. Pacman internally is moving right, but on screen moving left
-                else if (e.get_character(characters::PACMAN)->get_direction() != buffer_direction)
-                {
-                    // Set pacman's internal direction to the buffer direction
-                    // Note: This is because this means pacman has successfully turned around and reached
-                    //       original starting position. When we update his internal position to reflect this,
-                    //       his target tile will now be the correct tile.
-                    e.get_character(characters::PACMAN)->set_direction(buffer_direction);
-                }
-                // Else if pacman is moving along a straight path
-                else
-                {
-                    // Move pacman over a tile
-                    int powerup = -1;
-                    e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), buffer_direction, e.get_points(), &powerup);
-                    // If a power pellet was eaten
-                    if (powerup == power_types::POWER_PELLET)
-                    {
-                        // Set the ghost mode to frightened
-                        e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
-
-                        // If a ghost was not already eaten, set its speed to slow down
-                        for (int ghost = 0; ghost < 4; ghost++)
-                        {
-                            if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
-                            {
-                                speed_manager.set_threshold(ghost, 400);
-                                e.get_state_manager()->get_ghost_state_clock(ghost)->restart();
-                                e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(10000);
-                                e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &speed_manager]()
-                                                                                                      { speed_manager.update_ghost_speed(ghost, speed_manager.get_initial_time(type::GHOST)); });
-                            }
-                            else
-                            {
-                                e.get_state_manager()->get_ghost_state_clock(ghost)->restart(false);
-                            }
-                        }
                     }
 
                     // Recheck if pacman is able to move his intended direction
@@ -176,8 +146,8 @@ int main()
                 {
                     // Decrease lives by one, restart their clocks, reset all positions and states
                     e.get_life_manager()->decrement();
-                    speed_manager.reset_all();
-                    speed_manager.pacman_clock->restart();
+                    e.get_speed_manager()->reset_all();
+                    e.get_speed_manager()->pacman_clock->restart();
                     e.get_navigation()->reset_all_characters(e.get_board(), e.get_all_characters());
                     e.get_state_manager()->reset();
                 }
@@ -187,7 +157,7 @@ int main()
                     for (Occupant *occupant : occupants)
                     {
                         e.get_state_manager()->set_ghost_state(static_cast<Ghost *>(occupant)->get_type(), ghost_states::HEADING_BACK);
-                        speed_manager.set_threshold(static_cast<Ghost *>(occupant)->get_type(), 150);
+                        e.get_speed_manager()->set_threshold(static_cast<Ghost *>(occupant)->get_type(), 150);
                     }
                 }
             }
@@ -200,17 +170,14 @@ int main()
             for (int ghost = 0; ghost < 4; ghost++)
             {
                 // If the ghosts has moved one coin over
-                if (speed_manager.ghost_clocks[ghost]->need_restart())
+                if (e.get_speed_manager()->ghost_clocks[ghost]->need_restart())
                 {
                     // Move the ghosts corresponding to their internal direction
                     if (e.get_character(ghost))
                     {
-                        e.get_navigation()->move(e.get_character(ghost), e.get_board(), e.get_character(ghost)->get_direction());
-
                         // Calculate the ghosts new direction given their current state
-                        e.get_ai()->move_based_on_state(e.get_state_manager(), &speed_manager, ghost);
-
-                        speed_manager.ghost_clocks[ghost]->restart();
+                        e.get_ai()->move_based_on_state(e.get_state_manager(), e.get_speed_manager(), ghost, true);
+                        e.get_speed_manager()->ghost_clocks[ghost]->restart();
                     }
                 }
             }
@@ -236,16 +203,26 @@ int main()
 
                     bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
 
-                    if (event.key.code == sf::Keyboard::W)
+                    if (event.key.code == sf::Keyboard::R)
+                    {
+                        e.reset();
+                        e.initilize(Config::MAP_DIR + "map1.txt");
+                        e.get_ai()->move_all(e.get_state_manager(), e.get_speed_manager());
+                    }
+                    else if (event.key.code == sf::Keyboard::E)
+                    {
+                        e.get_map_editor()->toggle_editing(true);
+                    }
+                    else if (event.key.code == sf::Keyboard::W)
                     {
                         if (moves[moves::UP] && buffer_direction != moves::UP)
                         {
-                            speed_manager.pacman_clock->update(speed_manager.pacman_clock->get_threshold() - speed_manager.pacman_clock->get_time());
+                            e.get_speed_manager()->pacman_clock->update(e.get_speed_manager()->pacman_clock->get_threshold() - e.get_speed_manager()->pacman_clock->get_time());
                             buffer_direction = moves::UP;
                             intended_direction = buffer_direction;
                             if (is_stopped)
                             {
-                                speed_manager.pacman_clock->restart();
+                                e.get_speed_manager()->pacman_clock->restart();
                                 e.get_character(characters::PACMAN)->set_direction(moves::UP);
                             }
                         }
@@ -258,12 +235,12 @@ int main()
                     {
                         if (moves[moves::RIGHT] && buffer_direction != moves::RIGHT)
                         {
-                            speed_manager.pacman_clock->update(speed_manager.pacman_clock->get_threshold() - speed_manager.pacman_clock->get_time());
+                            e.get_speed_manager()->pacman_clock->update(e.get_speed_manager()->pacman_clock->get_threshold() - e.get_speed_manager()->pacman_clock->get_time());
                             buffer_direction = moves::RIGHT;
                             intended_direction = buffer_direction;
                             if (is_stopped)
                             {
-                                speed_manager.pacman_clock->restart();
+                                e.get_speed_manager()->pacman_clock->restart();
                                 e.get_character(characters::PACMAN)->set_direction(moves::RIGHT);
                             }
                         }
@@ -276,12 +253,12 @@ int main()
                     {
                         if (moves[moves::DOWN] && buffer_direction != moves::DOWN)
                         {
-                            speed_manager.pacman_clock->update(speed_manager.pacman_clock->get_threshold() - speed_manager.pacman_clock->get_time());
+                            e.get_speed_manager()->pacman_clock->update(e.get_speed_manager()->pacman_clock->get_threshold() - e.get_speed_manager()->pacman_clock->get_time());
                             buffer_direction = moves::DOWN;
                             intended_direction = buffer_direction;
                             if (is_stopped)
                             {
-                                speed_manager.pacman_clock->restart();
+                                e.get_speed_manager()->pacman_clock->restart();
                                 e.get_character(characters::PACMAN)->set_direction(moves::DOWN);
                             }
                         }
@@ -295,12 +272,12 @@ int main()
                     {
                         if (moves[moves::LEFT] && buffer_direction != moves::LEFT)
                         {
-                            speed_manager.pacman_clock->update(speed_manager.pacman_clock->get_threshold() - speed_manager.pacman_clock->get_time());
+                            e.get_speed_manager()->pacman_clock->update(e.get_speed_manager()->pacman_clock->get_threshold() - e.get_speed_manager()->pacman_clock->get_time());
                             buffer_direction = moves::LEFT;
                             intended_direction = buffer_direction;
                             if (is_stopped)
                             {
-                                speed_manager.pacman_clock->restart();
+                                e.get_speed_manager()->pacman_clock->restart();
                                 e.get_character(characters::PACMAN)->set_direction(moves::LEFT);
                             }
                         }
@@ -315,6 +292,13 @@ int main()
                     if (event.key.code == sf::Keyboard::P)
                     {
                         e.get_map_editor()->toggle_editing(false);
+                        e.get_speed_manager()->restart_all();
+                        player_animation_clock.restart();
+                        e.get_state_manager()->reset();
+                    }
+                    else if (event.key.code == sf::Keyboard::S)
+                    {
+                        e.get_map_editor()->array_to_file();
                     }
                 }
             }
@@ -325,7 +309,7 @@ int main()
                     float x = sf::Mouse::getPosition(window).x;
                     float y = sf::Mouse::getPosition(window).y;
 
-                    y -= (HEADER_HEIGHT + BODY_HEIGHT);
+                    y -= (Config::HEADER_HEIGHT + Config::BODY_HEIGHT);
                     for (int i = 0; i < e.get_map_editor()->get_tile_set()->size(); i++)
                     {
                         sf::FloatRect bounding_box = (*(e.get_map_editor()->get_tile_set()))[i].get_rect().getGlobalBounds();
@@ -336,8 +320,8 @@ int main()
                         }
                     }
 
-                    y += BODY_HEIGHT;
-                    if (y >= 0 && y <= BODY_HEIGHT)
+                    y += Config::BODY_HEIGHT;
+                    if (y >= 0 && y <= Config::BODY_HEIGHT)
                     {
                         e.get_map_editor()->add_tile(x, y);
                     }
@@ -354,7 +338,7 @@ int main()
             // If there is no collision or if the ghosts are frightened, draw lerping animation
             if (!e.get_life_manager()->get_collision() || e.get_state_manager()->get_ghost_mode() == ghost_modes::FRIGHTENED)
             {
-                d.draw_all_ghost_animation(e.get_state_manager(), e.get_all_characters(), &speed_manager, e.get_board()->get_rows(), e.get_board()->get_cols());
+                d.draw_all_ghost_animation(e.get_state_manager(), e.get_all_characters(), e.get_speed_manager(), e.get_board()->get_rows(), e.get_board()->get_cols());
 
                 // If a collision occured, set the collision to false
                 if (e.get_life_manager()->get_collision())
@@ -367,7 +351,7 @@ int main()
             {
                 d.draw_all_ghosts(e.get_all_characters(), e.get_board()->get_rows(), e.get_board()->get_cols());
 
-                e.get_ai()->move_all(e.get_state_manager(), &speed_manager);
+                e.get_ai()->move_all(e.get_state_manager(), e.get_speed_manager());
 
                 e.get_life_manager()->set_collision(false);
             }
@@ -379,23 +363,26 @@ int main()
             int target_y = y + linear_directions_one[e.get_character(characters::PACMAN)->get_direction()][1];
 
             // If pacman is stopped
-            if ((*(e.get_board()->get_board()))[target_x][target_y].find_occupant(type::WALL))
+            bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
+            if (!moves[e.get_character(characters::PACMAN)->get_direction()])
             {
-                d.pacman_animation(e.get_character(characters::PACMAN), x, y, x, y, buffer_direction, speed_manager.pacman_clock->get_tick(), e.get_board()->get_rows(), e.get_board()->get_cols());
+                d.pacman_animation(e.get_character(characters::PACMAN), x, y, x, y, buffer_direction, e.get_speed_manager()->pacman_clock->get_tick(), e.get_board()->get_rows(), e.get_board()->get_cols());
                 is_stopped = true;
             }
             // Else if pacman is moving along a straight path
             else if (buffer_direction == e.get_character(characters::PACMAN)->get_direction())
             {
-                d.pacman_animation(e.get_character(characters::PACMAN), x, y, target_x, target_y, buffer_direction, speed_manager.pacman_clock->get_tick(), e.get_board()->get_rows(), e.get_board()->get_cols());
+                d.pacman_animation(e.get_character(characters::PACMAN), x, y, target_x, target_y, buffer_direction, e.get_speed_manager()->pacman_clock->get_tick(), e.get_board()->get_rows(), e.get_board()->get_cols());
                 is_stopped = false;
             }
             // Else if pacman is reversing between cells
             else
             {
-                d.pacman_animation(e.get_character(characters::PACMAN), target_x, target_y, x, y, buffer_direction, speed_manager.pacman_clock->get_tick(), e.get_board()->get_rows(), e.get_board()->get_cols());
+                d.pacman_animation(e.get_character(characters::PACMAN), target_x, target_y, x, y, buffer_direction, e.get_speed_manager()->pacman_clock->get_tick(), e.get_board()->get_rows(), e.get_board()->get_cols());
                 is_stopped = false;
             }
+
+            delete[] moves;
 
             d.draw_score(e.get_points());
         }

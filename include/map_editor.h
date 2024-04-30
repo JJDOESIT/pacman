@@ -11,8 +11,10 @@
 #include "config.h"
 #include "tile.h"
 #include "draw_manager.h"
+#include "json.h"
 
 #include <vector>
+#include <string>
 
 class Map_Editor
 {
@@ -28,9 +30,10 @@ private:
     int selected_tile;
 
 public:
-    void create_map(int n_rows, int n_cols);
+    void
+    create_map(int n_rows, int n_cols);
     std::vector<std::vector<Occupant_List>> *get_board();
-
+    void array_to_file();
     int get_n_rows();
     int get_n_cols();
     std::vector<Tile> *get_tile_set();

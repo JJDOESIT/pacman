@@ -1,7 +1,7 @@
-#include "occupant.h"
-
 #ifndef _COIN_
 #define _COIN_
+
+#include "occupant.h"
 
 class Coin : public Occupant
 {

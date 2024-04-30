@@ -1,0 +1,10 @@
+tlcd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/shtd/trcd/n/
+svld/p/s/s/s/s/s/s/s/svrd/n/
+svld/s/tlcsc/shts/shts/shts/shts/trcsc/s/svrd/n/
+svld/s/svmr/s/s/s/s/svml/s/svrd/n/
+svld/s/gate/s/stlc/strc/s/svml/s/svrd/n/
+svld/s/svmr/s/sblc/sbrc/s/svml/s/svrd/n/
+svld/s/svmr/blinky/s/s/s/svml/s/svrd/n/
+svld/s/blcsc/shbs/shbs/shbs/shbs/brcsc/s/svrd/n/
+svld/s/s/s/s/s/s/s/pp/svrd/n/
+blcd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/shbd/brcd/e/

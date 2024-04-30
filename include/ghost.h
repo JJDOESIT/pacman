@@ -1,7 +1,7 @@
-#include "occupant.h"
-
 #ifndef _GHOST_
 #define _GHOST_
+
+#include "occupant.h"
 
 class Ghost : public Occupant
 {

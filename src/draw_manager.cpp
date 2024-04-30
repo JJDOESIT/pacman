@@ -40,7 +40,7 @@ void Draw_Manager::draw_score(Points *p)
     p->stringify();
     text_manager.set_text(p->get_points_string(), TEXT_HEIGHT, sf::Color::White);
     sf::Text text = text_manager.get_text();
-    text.setPosition(sf::Vector2f(10, (HEADER_HEIGHT / 2) - (TEXT_HEIGHT / 2)));
+    text.setPosition(sf::Vector2f(10, (Config::HEADER_HEIGHT / 2) - (TEXT_HEIGHT / 2)));
     header->draw(text);
 }
 
@@ -76,8 +76,8 @@ void Draw_Manager::draw_all()
     sf::Sprite header_texture(header->getTexture());
     sf::Sprite body_texture(body->getTexture());
     sf::Sprite footer_texture(footer->getTexture());
-    body_texture.setPosition(0, HEADER_HEIGHT);
-    footer_texture.setPosition(0, HEADER_HEIGHT + BODY_HEIGHT);
+    body_texture.setPosition(0, Config::HEADER_HEIGHT);
+    footer_texture.setPosition(0, Config::HEADER_HEIGHT + Config::BODY_HEIGHT);
     window->draw(header_texture);
     window->draw(body_texture);
     window->draw(footer_texture);
@@ -100,137 +100,22 @@ float *Draw_Manager::lerp(int x1, int y1, int x2, int y2, float tick)
 // Given a type, subtype, and state, set the according texture to the cell
 void Draw_Manager::set_texture(sf::RectangleShape &cell, int type, int specific_type, bool toggled)
 {
+    // If the type is a wall
     if (type == type::WALL)
     {
-        if (specific_type == wall_type::SHARPTOPLEFTCORNER)
-        {
-            cell.setTexture(texture_manager.get_texture("stlc"));
-        }
-        else if (specific_type == wall_type::SHARPTOPRIGHTCORNER)
-        {
-            cell.setTexture(texture_manager.get_texture("strc"));
-        }
-        else if (specific_type == wall_type::SHARPBOTTOMLEFTCORNER)
-        {
-            cell.setTexture(texture_manager.get_texture("sblc"));
-        }
-        else if (specific_type == wall_type::SHARPBOTTOMRIGHTCORNER)
-        {
-            cell.setTexture(texture_manager.get_texture("sbrc"));
-        }
-        else if (specific_type == wall_type::TOPRIGHTCORNERCONNECTOR)
-        {
-            cell.setTexture(texture_manager.get_texture("trcc"));
-        }
-        else if (specific_type == wall_type::TOPLEFTCORNERCONNECTOR)
-        {
-            cell.setTexture(texture_manager.get_texture("tlcc"));
-        }
-        else if (specific_type == wall_type::TOPLEFTCORNERCONNECTORVERTICAL)
-        {
-            cell.setTexture(texture_manager.get_texture("tlccv"));
-        }
-        else if (specific_type == wall_type::TOPRIGHTCORNERCONNECTORVERTICAL)
-        {
-            cell.setTexture(texture_manager.get_texture("trccv"));
-        }
-        else if (specific_type == wall_type::BOTTOMLEFTCORNERCONNECTORVERTICAL)
-        {
-            cell.setTexture(texture_manager.get_texture("blccv"));
-        }
-        else if (specific_type == wall_type::BOTTOMRIGHTCORNERCONNECTORVERTICAL)
-        {
-            cell.setTexture(texture_manager.get_texture("brccv"));
-        }
-        else if (specific_type == wall_type::TOPLEFTCORNERDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("tlcd"));
-        }
-        else if (specific_type == wall_type::TOPRIGHTCORNERDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("trcd"));
-        }
-        else if (specific_type == wall_type::BOTTOMRIGHTCORNERDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("brcd"));
-        }
-        else if (specific_type == wall_type::BOTTOMLEFTCORNERDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("blcd"));
-        }
-        if (specific_type == wall_type::TOPLEFTCORNERSINGLE)
-        {
-            cell.setTexture(texture_manager.get_texture("tlcs"));
-        }
-        else if (specific_type == wall_type::TOPRIGHTCORNERSINGLE)
-        {
-            cell.setTexture(texture_manager.get_texture("trcs"));
-        }
-        else if (specific_type == wall_type::BOTTOMRIGHTCORNERSINGLE)
-        {
-            cell.setTexture(texture_manager.get_texture("brcs"));
-        }
-        else if (specific_type == wall_type::BOTTOMLEFTCORNERSINGLE)
-        {
-            cell.setTexture(texture_manager.get_texture("blcs"));
-        }
-        else if (specific_type == wall_type::TOPLEFTCORNERSINGLECONNECTOR)
-        {
-            cell.setTexture(texture_manager.get_texture("tlcsc"));
-        }
-        else if (specific_type == wall_type::TOPRIGHTCORNERSINGLECONNECTOR)
-        {
-            cell.setTexture(texture_manager.get_texture("trcsc"));
-        }
-        else if (specific_type == wall_type::BOTTOMRIGHTCORNERSINGLECONNECTOR)
-        {
-            cell.setTexture(texture_manager.get_texture("brcsc"));
-        }
-        else if (specific_type == wall_type::BOTTOMLEFTCORNERSINGLECONNECTOR)
-        {
-            cell.setTexture(texture_manager.get_texture("blcsc"));
-        }
-        else if (specific_type == wall_type::STRAIGHTVERTICALLEFTDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("svld"));
-        }
-        else if (specific_type == wall_type::STRAIGHTVERTICALRIGHTDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("svrd"));
-        }
-        else if (specific_type == wall_type::STRAIGHTVERTICALMIDDLELEFT)
-        {
-            cell.setTexture(texture_manager.get_texture("svml"));
-        }
-        else if (specific_type == wall_type::STRAIGHTVERTICALMIDDLERIGHT)
-        {
-            cell.setTexture(texture_manager.get_texture("svmr"));
-        }
-        else if (specific_type == wall_type::STRAIGHTHORIZONTALTOPDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("shtd"));
-        }
-        else if (specific_type == wall_type::STRAIGHTHORIZONTALBOTTOMDOUBLE)
-        {
-            cell.setTexture(texture_manager.get_texture("shbd"));
-        }
-        else if (specific_type == wall_type::STRAIGHTHORIZONTALTOPSINGLE)
-        {
-            cell.setTexture(texture_manager.get_texture("shts"));
-        }
-        else if (specific_type == wall_type::STRAIGHTHORIZONTALBOTTOMSINGLE)
-        {
-            cell.setTexture(texture_manager.get_texture("shbs"));
-        }
-        else if (specific_type == wall_type::FILLED)
-        {
-            cell.setTexture(texture_manager.get_texture("f"));
-        }
-        else if (specific_type == wall_type::GATE)
-        {
-            cell.setTexture(texture_manager.get_texture("f"));
-        }
+        cell.setTexture(texture_manager.get_texture(Json::get_string(Config::JSON_DIR + "wall_strings" + ".json", std::to_string(specific_type))));
     }
+    // Else if the type is pacman
+    else if (type == type::PLAYER)
+    {
+        cell.setTexture(texture_manager.get_texture("fopm"));
+    }
+    // Else is the type is a ghost
+    else if (type == type::GHOST)
+    {
+        cell.setTexture(texture_manager.get_texture(Json::get_string(Config::JSON_DIR + "ghost_strings" + ".json", std::to_string(specific_type)) + "r"));
+    }
+    // Else if the type is a coin
     else if (type == type::COIN)
     {
         if (toggled)
@@ -242,6 +127,7 @@ void Draw_Manager::set_texture(sf::RectangleShape &cell, int type, int specific_
             cell.setTexture(texture_manager.get_texture("f"));
         }
     }
+    // Else if the type is a portal
     else if (type == type::PORTAL)
     {
         cell.setTexture(texture_manager.get_texture("f"));
@@ -278,17 +164,17 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board, in
 
             if (outline)
             {
-                cell_width = (SCREEN_WIDTH - (n_cols * (BORDER_OUTLINE_THICKNESS * 2))) / n_cols;
-                cell_height = (BODY_HEIGHT - (n_rows * (BORDER_OUTLINE_THICKNESS * 2))) / n_rows;
+                cell_width = (Config::SCREEN_WIDTH - (n_cols * (Config::BORDER_OUTLINE_THICKNESS * 2))) / n_cols;
+                cell_height = (Config::BODY_HEIGHT - (n_rows * (Config::BORDER_OUTLINE_THICKNESS * 2))) / n_rows;
                 cell.setSize(sf::Vector2f(cell_width, cell_height));
-                cell.setOutlineThickness(BORDER_OUTLINE_THICKNESS);
+                cell.setOutlineThickness(Config::BORDER_OUTLINE_THICKNESS);
                 cell.setOutlineColor(sf::Color::White);
-                cell.setPosition(sf::Vector2f(col * (SCREEN_WIDTH / n_cols) + BORDER_OUTLINE_THICKNESS, row * (BODY_HEIGHT / n_rows) + BORDER_OUTLINE_THICKNESS));
+                cell.setPosition(sf::Vector2f(col * (Config::SCREEN_WIDTH / n_cols) + Config::BORDER_OUTLINE_THICKNESS, row * (Config::BODY_HEIGHT / n_rows) + Config::BORDER_OUTLINE_THICKNESS));
             }
             else
             {
-                cell_width = SCREEN_WIDTH / n_cols;
-                cell_height = BODY_HEIGHT / n_rows;
+                cell_width = Config::SCREEN_WIDTH / n_cols;
+                cell_height = Config::BODY_HEIGHT / n_rows;
                 cell.setSize(sf::Vector2f(cell_width, cell_height));
                 cell.setPosition(sf::Vector2f(col * cell_width, row * cell_height));
             }
@@ -316,6 +202,21 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board, in
                 Power *power = static_cast<Power *>((*board)[row][col].find_occupant(type::POWER));
                 set_texture(cell, type::POWER, power->get_type(), power->get_toggled());
             }
+
+            // Note: Ghost and pacman should only be drawn while editing. This is
+            //       because during gameplay, the ghosts and pacman are drawn seperate.
+
+            // Else if the cell is a ghost
+            else if ((*board)[row][col].find_occupant(type::GHOST))
+            {
+                Ghost *ghost = static_cast<Ghost *>((*board)[row][col].find_occupant(type::GHOST));
+                set_texture(cell, type::GHOST, ghost->get_type());
+            }
+            // Else if the cell is pacman
+            else if ((*board)[row][col].find_occupant(type::PLAYER))
+            {
+                set_texture(cell, type::PLAYER, 0);
+            }
             body->draw(cell);
         }
     }
@@ -327,8 +228,8 @@ void Draw_Manager::pacman_animation(Occupant *pacman, int x, int y, int target_x
     float *current_position;
     current_position = lerp(x, y, target_x, target_y, tick);
 
-    int cell_width = SCREEN_WIDTH / n_cols;
-    int cell_height = BODY_HEIGHT / n_rows;
+    int cell_width = Config::SCREEN_WIDTH / n_cols;
+    int cell_height = Config::BODY_HEIGHT / n_rows;
     draw_pacman(pacman, current_position[0], current_position[1], direction, cell_width, cell_height);
 
     delete[] current_position;
@@ -394,8 +295,8 @@ void Draw_Manager::draw_all_ghost_animation(State_Manager *state_manager, Occupa
     {
         if (characters[character])
         {
-            int cell_width = SCREEN_WIDTH / n_cols;
-            int cell_height = BODY_HEIGHT / n_rows;
+            int cell_width = Config::SCREEN_WIDTH / n_cols;
+            int cell_height = Config::BODY_HEIGHT / n_rows;
             ghost_animation(state_manager, characters[character], names[character], speed_manager->ghost_clocks[character]->get_tick(), cell_width, cell_height);
         }
     }
@@ -438,8 +339,8 @@ void Draw_Manager::draw_all_ghosts(Occupant **characters, int n_rows, int n_cols
     {
         if (characters[character])
         {
-            int cell_width = SCREEN_WIDTH / n_cols;
-            int cell_height = BODY_HEIGHT / n_rows;
+            int cell_width = Config::SCREEN_WIDTH / n_cols;
+            int cell_height = Config::BODY_HEIGHT / n_rows;
             draw_ghost(characters[character], characters[character]->get_x_position(), characters[character]->get_y_position(), names[character], cell_width, cell_height);
         }
     }

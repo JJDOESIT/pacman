@@ -1,7 +1,8 @@
-#include <string>
-
 #ifndef _LIFE_MANAGER_
 #define _LIFE_MANAGER_
+
+#include "config.h"
+#include <string>
 
 class Life_Manager
 {
@@ -14,6 +15,7 @@ public:
     void decrement();
     void set_collision(bool c);
     bool get_collision();
+    void reset();
 };
 
 #endif

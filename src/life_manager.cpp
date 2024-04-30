@@ -22,3 +22,10 @@ bool Life_Manager::get_collision()
 {
     return collision;
 }
+
+// Reset lives
+void Life_Manager::reset()
+{
+    n_pacman_lives = Config::N_PACMAN_LIVES;
+    collision = false;
+}

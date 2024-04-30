@@ -1,7 +1,7 @@
-#include "occupant.h"
-
 #ifndef _PACMAN_
 #define _PACMAN_
+
+#include "occupant.h"
 
 class Pacman : public Occupant
 {

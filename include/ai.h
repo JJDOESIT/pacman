@@ -5,6 +5,7 @@
 #include "linear_directions.h"
 #include "state_manager.h"
 #include "speed_manager.h"
+#include "navigation.h"
 
 #include <cmath>
 
@@ -34,8 +35,9 @@ private:
 public:
     AI(Board *b, Navigation *n, Occupant *characters[5]);
     ~AI();
-    void move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost);
+    void move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost, bool move = false);
     void move_all(State_Manager *state_manager, Speed_Manager *speed_manager);
+    void set_target_tiles();
 };
 
 #endif

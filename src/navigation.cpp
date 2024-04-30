@@ -8,6 +8,7 @@ Navigation::Navigation(State_Manager *state_manager)
 // Return a bool array of possible moves the occupant can make
 bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
 {
+
     bool *moves = new bool[4]();
     int x = occupant->get_x_position();
     int y = occupant->get_y_position();
@@ -127,6 +128,36 @@ bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
                     {
                         moves[moves::LEFT] = true;
                     }
+                }
+            }
+
+            // Note: This case where no moves are valid shouldn't happen. But if it does, then
+            //       set the ghost to move back the way it came.
+            bool no_moves = true;
+            for (int move = 0; move < 4; move++)
+            {
+                if (moves[move])
+                {
+                    no_moves = false;
+                }
+            }
+            if (no_moves)
+            {
+                if (occupant->get_direction() == moves::UP)
+                {
+                    moves[moves::DOWN] = true;
+                }
+                else if (occupant->get_direction() == moves::DOWN)
+                {
+                    moves[moves::UP] = true;
+                }
+                else if (occupant->get_direction() == moves::LEFT)
+                {
+                    moves[moves::RIGHT] = true;
+                }
+                else if (occupant->get_direction() == moves::RIGHT)
+                {
+                    moves[moves::LEFT] = true;
                 }
             }
         }
@@ -257,14 +288,17 @@ void Navigation::reset_all_characters(Board *board, Occupant **characters)
 {
     for (int character = 0; character < 5; character++)
     {
-        reset_position(board, characters[character]);
-        if (character == characters::PACMAN)
+        if (characters[character])
         {
-            characters[character]->set_direction(static_cast<Pacman *>(characters[character])->get_initial_direction());
-        }
-        else
-        {
-            characters[character]->set_direction(static_cast<Ghost *>(characters[character])->get_initial_direction());
+            reset_position(board, characters[character]);
+            if (character == characters::PACMAN)
+            {
+                characters[character]->set_direction(static_cast<Pacman *>(characters[character])->get_initial_direction());
+            }
+            else
+            {
+                characters[character]->set_direction(static_cast<Ghost *>(characters[character])->get_initial_direction());
+            }
         }
     }
 }

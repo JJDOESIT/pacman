@@ -233,12 +233,9 @@ void AI::move_to_escape_tile(State_Manager *state_manager, int ghost)
 {
     Occupant *occupant = characters[ghost];
     bool *moves = n->get_possible_moves(occupant, b);
-
     int direction = best_direction(moves, occupant, state_manager->get_ghost_escape_x(ghost), state_manager->get_ghost_escape_y(ghost));
-
     static_cast<Ghost *>(occupant)->set_best_move(occupant->get_x_position() + linear_directions_one[direction][0], occupant->get_y_position() + linear_directions_one[direction][1]);
     occupant->set_direction(direction);
-
     delete[] moves;
 }
 
@@ -257,11 +254,26 @@ void AI::return_to_start(State_Manager *state_manager, int ghost)
 }
 
 // Move ghosts based on their current state and mode
-void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost)
+void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost, bool move)
 {
     Occupant *occupant = characters[ghost];
 
-    // If the ghost is not nullptr
+    // Move the ghost physically
+    if (move)
+    {
+        // Skip the move
+        if (state_manager->get_ghost_state(ghost) == ghost_states::SKIP_MOVE)
+        {
+            state_manager->set_ghost_state(ghost, ghost_states::ESCAPING);
+        }
+        // Else if the ghost is not disabled or if the ghost is at the escape tile (since we want to move the ghost once more)
+        else if (state_manager->get_ghost_state(ghost) != ghost_states::DISABLED || state_manager->has_escaped(occupant))
+        {
+            n->move(characters[ghost], b, occupant->get_direction());
+        }
+    }
+
+    // If the ghost is not nullptr or disabled
     if (occupant && state_manager->get_ghost_state(ghost) != ghost_states::DISABLED)
     {
         // If the ghost is escaping the den
@@ -288,12 +300,16 @@ void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_
             {
                 // Move them once more in their current direction
                 move_in_current_direction(ghost);
+
+                //  Set the ghost to be disabled
                 state_manager->set_ghost_state(ghost, ghost_states::DISABLED);
+
+                // Set the ghosts speed back to normal
                 speed_manager->ghost_clocks[ghost]->set_threshold(speed_manager->ghost_clocks[ghost]->get_initial_time());
-                state_manager->get_ghost_state_clock(ghost)->set_threshold(5000);
+                state_manager->get_ghost_state_clock(ghost)->set_threshold(Config::DISABLE_TIME);
                 state_manager->get_ghost_state_clock(ghost)->restart();
                 state_manager->get_ghost_state_clock(ghost)->delay_a_function([state_manager, ghost]()
-                                                                              { state_manager->set_ghost_state(ghost, ghost_states::ESCAPING); });
+                                                                              { state_manager->set_ghost_state(ghost, ghost_states::SKIP_MOVE); });
             }
             // Else if the ghost is still heading back
             else
@@ -351,4 +367,25 @@ void AI::move_all(State_Manager *state_manager, Speed_Manager *speed_manager)
     move_based_on_state(state_manager, speed_manager, ghosts_types::PINKY);
     move_based_on_state(state_manager, speed_manager, ghosts_types::INKY);
     move_based_on_state(state_manager, speed_manager, ghosts_types::CLYDE);
+}
+
+void AI::set_target_tiles()
+{
+    // Initilize the ghost's target tiles
+    if (characters[characters::game_characters::BLINKY])
+    {
+        static_cast<Ghost *>(characters[characters::game_characters::BLINKY])->set_target_tile(-3, b->get_cols() - 3);
+    }
+    if (characters[characters::game_characters::PINKY])
+    {
+        static_cast<Ghost *>(characters[characters::game_characters::PINKY])->set_target_tile(-3, 2);
+    }
+    if (characters[characters::game_characters::INKY])
+    {
+        static_cast<Ghost *>(characters[characters::game_characters::INKY])->set_target_tile(b->get_rows() + 1, b->get_cols());
+    }
+    if (characters[characters::game_characters::CLYDE])
+    {
+        static_cast<Ghost *>(characters[characters::game_characters::CLYDE])->set_target_tile(b->get_rows() + 1, 0);
+    }
 }

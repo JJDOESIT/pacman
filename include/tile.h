@@ -15,7 +15,7 @@ private:
     bool is_selected;
 
 public:
-    Tile(int type, int specific_type, int toggled = true);
+    Tile(int type, int specific_type = 0, int toggled = true);
     int get_type();
     int get_specific_type();
     int get_toggled();

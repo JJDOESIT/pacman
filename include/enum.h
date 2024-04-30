@@ -100,6 +100,7 @@ enum ghost_states
     ESCAPING,
     HEADING_BACK,
     FREE,
+    SKIP_MOVE,
 };
 
 #endif

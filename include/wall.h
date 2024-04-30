@@ -1,8 +1,7 @@
-#include "occupant.h"
-#include <string>
-
 #ifndef _WALL_
 #define _WALL_
+
+#include "occupant.h"
 
 class Wall : public Occupant
 {

@@ -1,8 +1,7 @@
-#include "enum.h"
-#include <iostream>
-
 #ifndef _OCCUPANT_
 #define _OCCUPANT_
+
+#include "enum.h"
 
 class Occupant
 {
@@ -21,7 +20,6 @@ public:
 
     void set_type(int t);
     int get_type();
-    void print_type();
 };
 
 #endif

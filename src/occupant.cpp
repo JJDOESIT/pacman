@@ -42,24 +42,3 @@ int Occupant::get_type()
 {
     return type;
 }
-
-// Print the type of the occupant
-void Occupant::print_type()
-{
-    if (type == type::PLAYER)
-    {
-        std::cout << "Type: Player" << std::endl;
-    }
-    else if (type == type::GHOST)
-    {
-        std::cout << "Type: Ghost" << std::endl;
-    }
-    else if (type == type::WALL)
-    {
-        std::cout << "Type: Wall" << std::endl;
-    }
-    else if (type == type::COIN)
-    {
-        std::cout << "Type: Coin" << std::endl;
-    }
-}

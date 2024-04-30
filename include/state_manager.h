@@ -1,14 +1,15 @@
+#ifndef _STATE_MANAGER_
+#define _STATE_MANAGER_
+
 #include "clock.h"
 #include "enum.h"
 #include "occupant.h"
 #include "ghost.h"
+#include "config.h"
 
 #include <functional>
 #include <vector>
 #include <string>
-
-#ifndef _STATE_MANAGER_
-#define _STATE_MANAGER_
 
 class State_Manager
 {

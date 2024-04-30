@@ -3,6 +3,12 @@
 State_Manager::State_Manager(int initial_state)
 {
     State_Manager::initial_state = initial_state;
+    set_ghost_escape_tile(ghosts_types::BLINKY, Config::BLINKY_ESCAPE_TILE[0], Config::BLINKY_ESCAPE_TILE[1]);
+    set_ghost_escape_tile(ghosts_types::PINKY, Config::PINKY_ESCAPE_TILE[0], Config::PINKY_ESCAPE_TILE[1]);
+    set_ghost_escape_tile(ghosts_types::INKY, Config::INKY_ESCAPE_TILE[0], Config::INKY_ESCAPE_TILE[1]);
+    set_ghost_escape_tile(ghosts_types::CLYDE, Config::CLYDE_ESCAPE_TILE[0], Config::CLYDE_ESCAPE_TILE[1]);
+    push(Config::SCATTER_TIME, ghost_modes::SCATTER);
+    push(Config::CHASE_TIME, ghost_modes::CHASE);
 }
 
 // Push a timing and ghost mode into the list

@@ -24,6 +24,33 @@ void Board::set_cols(int n)
     nCols = n;
 }
 
+void Board::print_board()
+{
+    for (int row = 0; row < nRows; row++)
+    {
+        for (int col = 0; col < nCols; col++)
+        {
+            if (board[row][col].find_occupant(type::PLAYER))
+            {
+                std::cout << "p";
+            }
+            else if (board[row][col].find_occupant(type::GHOST))
+            {
+                std::cout << "g";
+            }
+            else if (board[row][col].find_occupant(type::COIN))
+            {
+                std::cout << "c";
+            }
+            else if (board[row][col].find_occupant(type::WALL))
+            {
+                std::cout << "x";
+            }
+        }
+        std::cout << '\n';
+    }
+}
+
 // Return a pointer to the board
 std::vector<std::vector<Occupant_List>> *Board::get_board()
 {
@@ -37,45 +64,11 @@ void Board::clear()
     {
         for (int col = 0; col < nCols; col++)
         {
-            for (int occupant; occupant < board[row][col].get_oc_list().size(); occupant++)
-            {
-                delete board[row][col].get_oc_list()[occupant];
-            }
+            board[row][col].clear();
         }
     }
-}
+    board.clear();
 
-// Print the board state
-void Board::print_board()
-{
-    for (int i = 0; i < nRows; i++)
-    {
-        for (int j = 0; j < nCols; j++)
-        {
-            if (board[i][j].find_occupant(type::PLAYER) != nullptr)
-            {
-                std::cout << 'p';
-            }
-            else if (board[i][j].find_occupant(type::GHOST) != nullptr)
-            {
-                std::cout << 'g';
-            }
-            else if (board[i][j].find_occupant(type::WALL) != nullptr)
-            {
-                std::cout << 'x';
-            }
-            else if (board[i][j].find_occupant(type::COIN) != nullptr)
-            {
-                if (static_cast<Coin *>(board[i][j].find_occupant(type::COIN))->get_toggled())
-                {
-                    std::cout << 'c';
-                }
-                else
-                {
-                    std::cout << 's';
-                }
-            }
-        }
-        std::cout << '\n';
-    }
+    nRows = 0;
+    nCols = 0;
 }

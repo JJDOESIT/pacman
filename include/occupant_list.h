@@ -1,10 +1,10 @@
+#ifndef _OCCUPANT_LIST_
+#define _OCCUPANT_LIST_
+
 #include "occupant.h"
 #include "state_manager.h"
 
 #include <vector>
-
-#ifndef _OCCUPANT_LIST_
-#define _OCCUPANT_LIST_
 
 class Occupant_List
 {
@@ -19,7 +19,6 @@ public:
     void clear();
     std::vector<Occupant *> get_all_occupants(int type);
     std::vector<Occupant *> &get_oc_list();
-    void print_occupant_list();
     Occupant *find_occupant(int type);
 };
 

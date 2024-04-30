@@ -10,6 +10,7 @@ void Points::update(int n)
 void Points::reset()
 {
     n_points = 0;
+    stringify();
 }
 
 // Turn the points number into a readable string
