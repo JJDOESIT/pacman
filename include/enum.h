@@ -103,4 +103,20 @@ enum ghost_states
     SKIP_MOVE,
 };
 
+enum texture_surfaces
+{
+    HEADER,
+    BODY,
+    FOOTER,
+};
+
+enum game_states
+{
+    NO_MAP,
+    PLAYING,
+    EDITING,
+    LOADING_MAP,
+    LOADING_CONFIG,
+};
+
 #endif

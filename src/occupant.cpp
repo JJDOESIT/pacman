@@ -31,6 +31,11 @@ int Occupant::get_direction()
     return direction;
 }
 
+sf::RectangleShape *Occupant::get_cell()
+{
+    return &cell;
+}
+
 // Set the type of the occupant
 void Occupant::set_type(int t)
 {

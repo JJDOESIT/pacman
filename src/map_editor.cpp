@@ -1,11 +1,11 @@
 #include "map_editor.h"
 
+// Create a map a given size
 void Map_Editor::create_map(int n_rows, int n_cols)
 {
     Map_Editor::n_rows = n_rows;
     Map_Editor::n_cols = n_cols;
 
-    editing = true;
     selected_tile = -1;
 
     for (int row = 0; row < n_rows; row++)
@@ -88,11 +88,53 @@ float Map_Editor::get_mouse_position(int number, int cell_width, int offset)
     return number / cell_width;
 }
 
+// Initilize default config file
+void Map_Editor::create_config_file(int map_count)
+{
+    rapidjson::Document *document = Json::get_document(Config::JSON_DIR + "default_config.json");
+    rapidjson::Value *config_list = Json::get_object(document, "config");
+
+    // Create a new file
+    std::ofstream ofstream("config/config" + std::to_string(map_count) + ".txt");
+
+    // Check if the file was created
+    if (!ofstream)
+    {
+        std::cout << "Error: Cannot create file ..." << std::endl;
+        exit(1);
+    }
+
+    int int_value;
+    int array_value[2];
+    std::string string_value;
+    for (rapidjson::Value::MemberIterator item = config_list->MemberBegin(); item != config_list->MemberEnd(); item++)
+    {
+        if (item->value.IsInt())
+        {
+            int_value = item->value.GetInt();
+            ofstream << item->name.GetString() << "=" << int_value << '\n';
+        }
+        else if (item->value.IsArray())
+        {
+            array_value[0] = item->value.GetArray()[0].GetInt();
+            array_value[1] = item->value.GetArray()[1].GetInt();
+            ofstream << item->name.GetString() << "=" << array_value[0] << "," << array_value[1] << '\n';
+        }
+        else if (item->value.IsString())
+        {
+            string_value = item->value.GetString();
+            ofstream << item->name.GetString() << "=" << string_value << '\n';
+        }
+    }
+
+    ofstream.close();
+}
+
 // Convert the array to a map text file
 void Map_Editor::array_to_file()
 {
 
-    int map_count = Json::get_int(Config::JSON_DIR + "config" + ".json", "map_count");
+    int map_count = Json::get_int(Config::JSON_DIR + "map_count" + ".json", "map_count");
 
     // Create a new file
     std::ofstream ofstream(Config::MAP_DIR + "map" + std::to_string(map_count) + ".txt");
@@ -100,57 +142,97 @@ void Map_Editor::array_to_file()
     // Check if the file was created
     if (!ofstream)
     {
+        std::cout << "Error: Cannot create file ..." << std::endl;
         exit(1);
     }
 
     // Increament the map count by one
-    Json::set_int(Config::JSON_DIR + "config" + ".json", "map_count", ++map_count);
+    Json::set_int(Config::JSON_DIR + "map_count" + ".json", "map_count", ++map_count);
 
-    int type, specific_type, toggle;
-    std::string string_type;
+    int board_type, board_specific_type, board_toggled;
+    int tile_type, tile_specific_type, tile_toggled;
 
-    // Loop through the board
+    rapidjson::Document *document = Json::get_document(Config::JSON_DIR + "tiles.json");
+    rapidjson::Value *tile_list = Json::get_object(document, "tiles");
+
     for (int row = 0; row < n_rows; row++)
     {
         for (int col = 0; col < n_cols; col++)
         {
             // Get the type of the occupant
-            type = board[row][col].get_oc_list()[0]->get_type();
+            board_type = board[row][col].get_oc_list()[0]->get_type();
+            if (board_type == type::WALL)
+            {
+                board_specific_type = static_cast<Wall *>(board[row][col].get_oc_list()[0])->get_wall_type();
+            }
+            else if (board_type == type::GHOST)
+            {
+                board_specific_type = static_cast<Ghost *>(board[row][col].get_oc_list()[0])->get_type();
+            }
+            else if (board_type == type::COIN)
+            {
+                board_toggled = static_cast<Coin *>(board[row][col].get_oc_list()[0])->get_toggled();
+            }
+            else if (board_type == type::POWER)
+            {
+                board_specific_type = static_cast<Power *>(board[row][col].get_oc_list()[0])->get_type();
+            }
 
-            if (type == type::WALL)
+            for (rapidjson::Value::MemberIterator tile = tile_list->MemberBegin(); tile != tile_list->MemberEnd(); tile++)
             {
-                specific_type = static_cast<Wall *>(board[row][col].get_oc_list()[0])->get_wall_type();
-                string_type = Json::get_string(Config::JSON_DIR + "wall_strings" + ".json", std::to_string(specific_type));
+                tile_type = Json::get_int_from_object(&(tile->value), "type");
+                if (tile_type == type::WALL)
+                {
+                    tile_specific_type = Json::get_int_from_object(&(tile->value), "specific_type");
+                    if (tile_specific_type == board_specific_type && tile_type == board_type)
+                    {
+                        ofstream << std::string(tile->name.GetString()) + "/";
+                    }
+                }
+                else if (tile_type == type::COIN)
+                {
+                    tile_toggled = Json::get_int_from_object(&(tile->value), "toggled");
+                    if (tile_toggled == board_toggled && tile_type == board_type)
+                    {
+                        ofstream << std::string(tile->name.GetString()) + "/";
+                    }
+                }
+                else if (tile_type == type::PLAYER)
+                {
+                    if (tile_type == board_type)
+                    {
+                        ofstream << std::string(tile->name.GetString()) + "/";
+                    }
+                }
+                else if (tile_type == type::GHOST)
+                {
+                    tile_specific_type = Json::get_int_from_object(&(tile->value), "specific_type");
+                    if (tile_specific_type == board_specific_type && tile_type == board_type)
+                    {
+                        ofstream << std::string(tile->name.GetString()) + "/";
+                    }
+                }
+                else if (tile_type == type::POWER)
+                {
+                    tile_specific_type = Json::get_int_from_object(&(tile->value), "specific_type");
+                    if (tile_specific_type == board_specific_type && tile_type == board_type)
+                    {
+                        ofstream << std::string(tile->name.GetString()) + "/";
+                    }
+                }
             }
-            else if (type == type::GHOST)
-            {
-                specific_type = static_cast<Ghost *>(board[row][col].get_oc_list()[0])->get_type();
-                string_type = Json::get_string(Config::JSON_DIR + "ghost_strings" + ".json", std::to_string(specific_type));
-            }
-            else if (type == type::COIN)
-            {
-                toggle = static_cast<Coin *>(board[row][col].get_oc_list()[0])->get_toggled();
-                string_type = Json::get_string(Config::JSON_DIR + "coin_strings" + ".json", std::to_string(toggle));
-            }
-            else if (type == type::POWER)
-            {
-                specific_type = static_cast<Power *>(board[row][col].get_oc_list()[0])->get_type();
-                string_type = Json::get_string(Config::JSON_DIR + "power_strings" + ".json", std::to_string(specific_type));
-            }
-            else if (type == type::PLAYER)
-            {
-                string_type = Json::get_string(Config::JSON_DIR + "pacman_strings" + ".json", "0");
-            }
-            ofstream << string_type + "/";
         }
         row != n_rows - 1 ? ofstream << "n/"
                                      << "\n"
                           : ofstream << "e/";
     }
+    delete document;
+    ofstream.close();
+    create_config_file(map_count - 1);
 }
 
 // Add a specific occupant to the board
-void Map_Editor::add(int row, int col, int type, int specific_type)
+void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type)
 {
     // Clear the occupant list
     board[row][col].clear();
@@ -191,6 +273,9 @@ void Map_Editor::add(int row, int col, int type, int specific_type)
     {
         occupant = new Power(row, col, specific_type);
     }
+
+    // Set the texture of the newly created occupant
+    draw_manager->set_texture(*occupant->get_cell(), type, specific_type);
 
     // Push the new occupant onto the board
     board[row][col].push(occupant);
@@ -237,18 +322,6 @@ void Map_Editor::initilize_tiles(Draw_Manager *draw_manager, int n_in_row)
     }
 }
 
-// Toggle the state to be editing or not editing
-void Map_Editor::toggle_editing(bool editing)
-{
-    Map_Editor::editing = editing;
-}
-
-// Return whether the user is creating a map or not
-bool Map_Editor::is_editing()
-{
-    return editing;
-}
-
 // Select a tile given relative coords to the footer window
 void Map_Editor::select_tile(float x, float y)
 {
@@ -263,7 +336,8 @@ void Map_Editor::select_tile(float x, float y)
     tiles[selected_tile].get_rect().setOutlineColor(sf::Color::Red);
 }
 
-void Map_Editor::add_tile(float x, float y)
+// Add a tile to a given cell based on mouse click
+void Map_Editor::add_tile(Draw_Manager *draw_manager, float x, float y)
 {
     if (selected_tile != -1)
     {
@@ -271,6 +345,22 @@ void Map_Editor::add_tile(float x, float y)
         float cell_height = Config::BODY_HEIGHT / n_rows;
         x = get_mouse_position(x, cell_width);
         y = get_mouse_position(y, cell_height);
-        add(y, x, tiles[selected_tile].get_type(), tiles[selected_tile].get_specific_type());
+        add(draw_manager, y, x, tiles[selected_tile].get_type(), tiles[selected_tile].get_specific_type());
     }
+}
+
+// Return a new vector containing all files in the MAP_DIR
+std::vector<std::string> *Map_Editor::map_files()
+{
+    for (const auto &entry : std::filesystem::directory_iterator(Config::MAP_DIR))
+    {
+        map_names.push_back(entry.path().filename().string());
+    }
+    return &map_names;
+}
+
+// Clear the map files vector
+void Map_Editor::clear_map_files()
+{
+    map_names.clear();
 }

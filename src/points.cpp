@@ -26,11 +26,17 @@ void Points::stringify()
         total = total / 10;
         index -= 1;
     }
-    points_string = std::string(points_array);
+    text.setString(points_array);
 }
 
-// Return the points string (used for drawing calls)
-std::string Points::get_points_string()
+// Return a pointer to the sf::Text reference
+sf::Text *Points::get_text()
 {
-    return points_string;
+    return &text;
+}
+
+// Return a pointer to the sf::Font reference
+sf::Font *Points::get_font()
+{
+    return &font;
 }

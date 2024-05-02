@@ -11,6 +11,18 @@ State_Manager::State_Manager(int initial_state)
     push(Config::CHASE_TIME, ghost_modes::CHASE);
 }
 
+// Set the current map
+void State_Manager::set_map(std::string map)
+{
+    current_map = map;
+}
+
+// Return the current map
+std::string State_Manager::get_map()
+{
+    return current_map;
+}
+
 // Push a timing and ghost mode into the list
 void State_Manager::push(int timing, int mode)
 {

@@ -166,7 +166,7 @@ bool *Navigation::get_possible_moves(Occupant *occupant, Board *board)
 }
 
 // Move a player or ghost a given direction
-void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
+void Navigation::move_occupant(Draw_Manager *draw_manager, Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
 {
     int row = occupant->get_x_position();
     int col = occupant->get_y_position();
@@ -230,6 +230,7 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
             {
                 coin->set_toggled(false);
                 points->update(10);
+                draw_manager->set_texture(*coin->get_cell(), coin->get_type(), 0, false);
             }
         }
         // Determine whether pacman has entered a space with a power up in it (If he has, return what type)
@@ -243,6 +244,7 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
                     power->set_toggled(false);
                     points->update(200);
                     *powerup = power_types::POWER_PELLET;
+                    draw_manager->set_texture(*power->get_cell(), type::POWER, static_cast<Power *>(power)->get_type(), false);
                 }
             }
         }
@@ -250,7 +252,7 @@ void Navigation::move_occupant(Occupant *occupant, Board *board, int direction, 
 }
 
 // User interface class to move a given occupant a given direction
-void Navigation::move(Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
+void Navigation::move(Draw_Manager *draw_manager, Occupant *occupant, Board *board, int direction, Points *points, int *powerup)
 {
     if (occupant)
     {
@@ -258,7 +260,7 @@ void Navigation::move(Occupant *occupant, Board *board, int direction, Points *p
 
         if (moves[direction])
         {
-            move_occupant(occupant, board, direction, points, powerup);
+            move_occupant(draw_manager, occupant, board, direction, points, powerup);
         }
 
         delete[] moves;

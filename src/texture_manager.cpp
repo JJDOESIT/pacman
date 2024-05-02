@@ -132,6 +132,10 @@ Texture_Manager::Texture_Manager()
     texture.loadFromFile("images/wall_sprite_sheet.png", sf::IntRect(108, 18, 8, 8));
     texture_map.insert(std::pair<std::string, sf::Texture>("f", texture));
 
+    // Gate wall
+    texture.loadFromFile("images/wall_sprite_sheet.png", sf::IntRect(108, 18, 8, 8));
+    texture_map.insert(std::pair<std::string, sf::Texture>("gate", texture));
+
     // Fully open mouth pacman
     texture.loadFromFile("images/general_sprite_sheet.png", sf::IntRect(0, 0, 16, 16));
     texture_map.insert(std::pair<std::string, sf::Texture>("fopm", texture));

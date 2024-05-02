@@ -1,13 +1,11 @@
 #include "draw_manager.h"
 
-Draw_Manager::Draw_Manager(sf::RenderWindow &w, sf::RenderTexture &h, sf::RenderTexture &b, sf::RenderTexture &f, int rows, int cols)
+Draw_Manager::Draw_Manager(sf::RenderWindow &w, sf::RenderTexture &h, sf::RenderTexture &b, sf::RenderTexture &f)
 {
     window = &w;
     header = &h;
     body = &b;
     footer = &f;
-    nRows = rows;
-    nCols = cols;
 }
 
 // Handle the rotation of a sprite given a direction
@@ -38,10 +36,9 @@ void Draw_Manager::handle_rotation(Occupant *occupant, sf::RectangleShape &cell,
 void Draw_Manager::draw_score(Points *p)
 {
     p->stringify();
-    text_manager.set_text(p->get_points_string(), TEXT_HEIGHT, sf::Color::White);
-    sf::Text text = text_manager.get_text();
-    text.setPosition(sf::Vector2f(10, (Config::HEADER_HEIGHT / 2) - (TEXT_HEIGHT / 2)));
-    header->draw(text);
+    Text_Manager::set_font(p->get_text(), p->get_font(), "fonts/ranchos.otf");
+    Text_Manager::set_position(p->get_text(), 10, (Config::HEADER_HEIGHT / 2) - (TEXT_HEIGHT / 2));
+    header->draw(*p->get_text());
 }
 
 // Draw the tile set for the map editor
@@ -100,53 +97,133 @@ float *Draw_Manager::lerp(int x1, int y1, int x2, int y2, float tick)
 // Given a type, subtype, and state, set the according texture to the cell
 void Draw_Manager::set_texture(sf::RectangleShape &cell, int type, int specific_type, bool toggled)
 {
-    // If the type is a wall
-    if (type == type::WALL)
+    if (type == type::PORTAL)
     {
-        cell.setTexture(texture_manager.get_texture(Json::get_string(Config::JSON_DIR + "wall_strings" + ".json", std::to_string(specific_type))));
+        cell.setTexture(texture_manager.get_texture("f"));
+        return;
     }
-    // Else if the type is pacman
     else if (type == type::PLAYER)
     {
         cell.setTexture(texture_manager.get_texture("fopm"));
+        return;
     }
-    // Else is the type is a ghost
-    else if (type == type::GHOST)
+
+    int tile_type, tile_specific_type, tile_toggled;
+    rapidjson::Document *document = Json::get_document(Config::JSON_DIR + "tiles.json");
+    rapidjson::Value *tile_list = Json::get_object(document, "tiles");
+
+    for (rapidjson::Value::MemberIterator tile = tile_list->MemberBegin(); tile != tile_list->MemberEnd(); tile++)
     {
-        cell.setTexture(texture_manager.get_texture(Json::get_string(Config::JSON_DIR + "ghost_strings" + ".json", std::to_string(specific_type)) + "r"));
-    }
-    // Else if the type is a coin
-    else if (type == type::COIN)
-    {
-        if (toggled)
+        tile_type = Json::get_int_from_object(&(tile->value), "type");
+        if (tile_type == type::WALL)
         {
-            cell.setTexture(texture_manager.get_texture("c"));
-        }
-        else
-        {
-            cell.setTexture(texture_manager.get_texture("f"));
-        }
-    }
-    // Else if the type is a portal
-    else if (type == type::PORTAL)
-    {
-        cell.setTexture(texture_manager.get_texture("f"));
-    }
-    else if (type == type::POWER)
-    {
-        // If the power up has not been eaten yet
-        if (toggled)
-        {
-            // If the power up is a power pellet
-            if (specific_type == power_types::POWER_PELLET)
+            tile_specific_type = Json::get_int_from_object(&(tile->value), "specific_type");
+            if (tile_specific_type == specific_type && tile_type == type)
             {
-                cell.setTexture(texture_manager.get_texture("pp"));
+                cell.setTexture(texture_manager.get_texture(std::string(tile->name.GetString())));
+                break;
             }
         }
-        // Else if the power up has been eaten
-        else
+        else if (tile_type == type::COIN)
         {
-            cell.setTexture(texture_manager.get_texture("f"));
+            if (tile_type == type)
+            {
+                if (toggled)
+                {
+                    cell.setTexture(texture_manager.get_texture(std::string(tile->name.GetString())));
+                }
+                else
+                {
+                    cell.setTexture(texture_manager.get_texture("f"));
+                }
+                break;
+            }
+        }
+        else if (tile_type == type::GHOST)
+        {
+            tile_specific_type = Json::get_int_from_object(&(tile->value), "specific_type");
+            if (tile_specific_type == specific_type && tile_type == type)
+            {
+                cell.setTexture(texture_manager.get_texture(std::string(tile->name.GetString()) + "r"));
+                break;
+            }
+        }
+        else if (tile_type == type::POWER)
+        {
+            tile_specific_type = Json::get_int_from_object(&(tile->value), "specific_type");
+            if (tile_specific_type == specific_type && tile_type == type)
+            {
+                if (toggled)
+                {
+                    cell.setTexture(texture_manager.get_texture(std::string(tile->name.GetString())));
+                }
+                else
+                {
+                    cell.setTexture(texture_manager.get_texture("f"));
+                }
+                break;
+            }
+        }
+    }
+    delete document;
+}
+
+// Draw all the buttons in a given button list
+void Draw_Manager::draw_buttons(std::vector<Button *> *buttons, int texture_surface)
+{
+    for (int b = 0; b < (*buttons).size(); b++)
+    {
+        if (texture_surface == texture_surfaces::HEADER)
+        {
+            header->draw(*(*buttons)[b]->get_cell());
+            header->draw(*(*buttons)[b]->get_text());
+        }
+        else if (texture_surface == texture_surfaces::BODY)
+        {
+            body->draw(*(*buttons)[b]->get_cell());
+            body->draw(*(*buttons)[b]->get_text());
+        }
+        else if (texture_surface == texture_surfaces::FOOTER)
+        {
+            footer->draw(*(*buttons)[b]->get_cell());
+            footer->draw(*(*buttons)[b]->get_text());
+        }
+    }
+}
+
+void Draw_Manager::initilize_textures(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols)
+{
+    for (int row = 0; row < n_rows; row++)
+    {
+        for (int col = 0; col < n_cols; col++)
+        {
+            for (auto occupant : (*board)[row][col].get_oc_list())
+            {
+                if (occupant->get_type() == type::WALL)
+                {
+                    set_texture(*occupant->get_cell(), occupant->get_type(), static_cast<Wall *>(occupant)->get_wall_type());
+                }
+                else if (occupant->get_type() == type::COIN)
+                {
+                    set_texture(*occupant->get_cell(), occupant->get_type(), 0, static_cast<Coin *>(occupant)->get_toggled());
+                }
+                else if (occupant->get_type() == type::POWER)
+                {
+                    set_texture(*occupant->get_cell(), occupant->get_type(), static_cast<Power *>(occupant)->get_type(), static_cast<Power *>(occupant)->get_toggled());
+                }
+                else if (occupant->get_type() == type::PORTAL)
+                {
+                    set_texture(*occupant->get_cell(), occupant->get_type(), 0);
+                }
+                else if (occupant->get_type() == type::PLAYER)
+                {
+                    set_texture(*occupant->get_cell(), occupant->get_type(), 0);
+                }
+                else if (occupant->get_type() == type::GHOST)
+                {
+                    set_texture(*occupant->get_cell(), occupant->get_type(), static_cast<Ghost *>(occupant)->get_type());
+                }
+            }
         }
     }
 }
@@ -160,47 +237,26 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board, in
     {
         for (int col = 0; col < n_cols; col++)
         {
-            sf::RectangleShape cell;
-
-            if (outline)
-            {
-                cell_width = (Config::SCREEN_WIDTH - (n_cols * (Config::BORDER_OUTLINE_THICKNESS * 2))) / n_cols;
-                cell_height = (Config::BODY_HEIGHT - (n_rows * (Config::BORDER_OUTLINE_THICKNESS * 2))) / n_rows;
-                cell.setSize(sf::Vector2f(cell_width, cell_height));
-                cell.setOutlineThickness(Config::BORDER_OUTLINE_THICKNESS);
-                cell.setOutlineColor(sf::Color::White);
-                cell.setPosition(sf::Vector2f(col * (Config::SCREEN_WIDTH / n_cols) + Config::BORDER_OUTLINE_THICKNESS, row * (Config::BODY_HEIGHT / n_rows) + Config::BORDER_OUTLINE_THICKNESS));
-            }
-            else
-            {
-                cell_width = Config::SCREEN_WIDTH / n_cols;
-                cell_height = Config::BODY_HEIGHT / n_rows;
-                cell.setSize(sf::Vector2f(cell_width, cell_height));
-                cell.setPosition(sf::Vector2f(col * cell_width, row * cell_height));
-            }
-
+            sf::RectangleShape *cell;
             // If the cell is a wall
             if ((*board)[row][col].find_occupant(type::WALL))
             {
-                Wall *wall = static_cast<Wall *>((*board)[row][col].find_occupant(type::WALL));
-                set_texture(cell, type::WALL, wall->get_wall_type());
+                cell = (*board)[row][col].find_occupant(type::WALL)->get_cell();
             }
             // If the cell is a coin
             else if ((*board)[row][col].find_occupant(type::COIN))
             {
-                Coin *coin = static_cast<Coin *>((*board)[row][col].find_occupant(type::COIN));
-                set_texture(cell, type::COIN, 0, coin->get_toggled());
+                cell = (*board)[row][col].find_occupant(type::COIN)->get_cell();
             }
             // If the cell is a portal
             else if ((*board)[row][col].find_occupant(type::PORTAL))
             {
-                set_texture(cell, type::PORTAL, 0);
+                cell = (*board)[row][col].find_occupant(type::PORTAL)->get_cell();
             }
             // Else if the cell is a power up
             else if ((*board)[row][col].find_occupant(type::POWER))
             {
-                Power *power = static_cast<Power *>((*board)[row][col].find_occupant(type::POWER));
-                set_texture(cell, type::POWER, power->get_type(), power->get_toggled());
+                cell = (*board)[row][col].find_occupant(type::POWER)->get_cell();
             }
 
             // Note: Ghost and pacman should only be drawn while editing. This is
@@ -209,15 +265,32 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board, in
             // Else if the cell is a ghost
             else if ((*board)[row][col].find_occupant(type::GHOST))
             {
-                Ghost *ghost = static_cast<Ghost *>((*board)[row][col].find_occupant(type::GHOST));
-                set_texture(cell, type::GHOST, ghost->get_type());
+                cell = (*board)[row][col].find_occupant(type::GHOST)->get_cell();
             }
             // Else if the cell is pacman
             else if ((*board)[row][col].find_occupant(type::PLAYER))
             {
-                set_texture(cell, type::PLAYER, 0);
+                cell = (*board)[row][col].find_occupant(type::PLAYER)->get_cell();
             }
-            body->draw(cell);
+
+            if (outline)
+            {
+                cell_width = (Config::SCREEN_WIDTH - (n_cols * (Config::BORDER_OUTLINE_THICKNESS * 2)) - (n_cols - 1)) / n_cols;
+                cell_height = (Config::BODY_HEIGHT - (n_rows * (Config::BORDER_OUTLINE_THICKNESS * 2)) - (n_rows - 1)) / n_rows;
+                cell->setSize(sf::Vector2f(cell_width, cell_height));
+                cell->setOutlineThickness(Config::BORDER_OUTLINE_THICKNESS);
+                cell->setOutlineColor(sf::Color::White);
+                cell->setPosition(sf::Vector2f(col * (Config::SCREEN_WIDTH / n_cols) + Config::BORDER_OUTLINE_THICKNESS, row * (Config::BODY_HEIGHT / n_rows) + Config::BORDER_OUTLINE_THICKNESS));
+            }
+            else
+            {
+                cell_width = Config::SCREEN_WIDTH / n_cols;
+                cell_height = Config::BODY_HEIGHT / n_rows;
+                cell->setSize(sf::Vector2f(cell_width, cell_height));
+                cell->setPosition(sf::Vector2f(col * cell_width, row * cell_height));
+            }
+
+            body->draw(*cell);
         }
     }
 }

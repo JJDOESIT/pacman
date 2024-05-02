@@ -35,8 +35,8 @@ private:
 public:
     AI(Board *b, Navigation *n, Occupant *characters[5]);
     ~AI();
-    void move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost, bool move = false);
-    void move_all(State_Manager *state_manager, Speed_Manager *speed_manager);
+    void move_based_on_state(Draw_Manager *draw_manager, State_Manager *state_manager, Speed_Manager *speed_manager, int ghost, bool move = false);
+    void move_all(Draw_Manager *draw_manager, State_Manager *state_manager, Speed_Manager *speed_manager);
     void set_target_tiles();
 };
 

@@ -1,24 +1,27 @@
 #include "engine.h"
 
-Engine::Engine(std::string map_name)
-{
-    initilize(map_name);
-}
-
 Engine::~Engine()
 {
-    reset();
+    if (initilized)
+    {
+        reset();
+    }
 }
 
 // Initilize the game engine
 void Engine::initilize(std::string map_name)
 {
+    if (initilized)
+    {
+        reset();
+    }
     text_to_array(map_name);
     state_manager = new State_Manager{ghost_states::ESCAPING};
     navigation = new Navigation{state_manager};
     speed_manager = new Speed_Manager{state_manager, Config::PACMAN_SPEED, Config::GHOST_SPEED};
     ai = new AI{&board, navigation, characters};
     ai->set_target_tiles();
+    initilized = true;
 }
 
 // Reset the game engine
@@ -37,6 +40,7 @@ void Engine::reset()
     delete navigation;
     delete speed_manager;
     delete ai;
+    initilized = false;
 }
 
 // Fill the board array from the given text file
@@ -261,6 +265,12 @@ Navigation *Engine::get_navigation()
 AI *Engine::get_ai()
 {
     return ai;
+}
+
+// Return whether the engine is initilized or not
+bool Engine::is_initilized()
+{
+    return initilized;
 }
 
 // Return a pointer to the points instance

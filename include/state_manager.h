@@ -14,6 +14,8 @@
 class State_Manager
 {
 private:
+    std::string current_map;
+
     int initial_state;
 
     int mode_index = 0;
@@ -28,6 +30,10 @@ private:
 
 public:
     State_Manager(int initial_state);
+
+    void set_map(std::string map);
+    std::string get_map();
+
     void push(int timing, int mode);
     void update_mode(int overide_mode = -1);
     void overide_mode(int timing, int mode);

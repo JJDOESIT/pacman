@@ -4,11 +4,14 @@
 #include "speed_manager.h"
 #include "SFML/Graphics.hpp"
 #include "linear_directions.h"
+#include "buttons.h"
 #include "config.h"
 
 int main()
 {
-    Engine e(Config::MAP_DIR + "map0.txt");
+    Engine e;
+
+    int game_state = game_states::NO_MAP;
 
     sf::RenderWindow window(sf::VideoMode(Config::SCREEN_WIDTH, Config::HEADER_HEIGHT + Config::BODY_HEIGHT + Config::FOOTER_HEIGHT), "Pac-Man");
     sf::RenderTexture body;
@@ -19,26 +22,71 @@ int main()
     body.create(Config::SCREEN_WIDTH, Config::BODY_HEIGHT);
     footer.create(Config::SCREEN_WIDTH, Config::FOOTER_HEIGHT);
 
-    Draw_Manager d(window, header, body, footer, e.get_board()->get_rows(), e.get_board()->get_cols());
+    Draw_Manager d(window, header, body, footer);
 
-    e.get_map_editor()->create_map(10, 10);
+    e.get_map_editor()->create_map(20, 20);
 
     e.get_map_editor()->initilize_tiles(&d, 20);
+
+    d.initilize_textures(e.get_map_editor()->get_board(), e.get_map_editor()->get_n_rows(), e.get_map_editor()->get_n_cols());
 
     sf::Event event;
 
     Clock player_animation_clock(100);
 
     bool is_stopped = false;
-    int buffer_direction = e.get_character(characters::PACMAN)->get_direction();
-    int intended_direction = buffer_direction;
+    int buffer_direction, intended_direction;
 
-    e.get_ai()->move_all(e.get_state_manager(), e.get_speed_manager());
-    std::cout << e.get_character(2)->get_y_position() << ", " << static_cast<Ghost *>(e.get_character(2))->get_best_y_tile() << std::endl;
+    Buttons editing_header_button_list;
+    Buttons playing_header_button_list;
+    Buttons loading_map_body_button_list;
+
+    const int BUTTON_WIDTH = 75;
+    const int BUTTON_HEIGHT = 50;
+    int MAP_BUTTON_WIDTH = Config::SCREEN_WIDTH / 2;
+
+    editing_header_button_list.push(new Button(Config::SCREEN_WIDTH - BUTTON_WIDTH - (BUTTON_WIDTH / 2), Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), 75, 50, 10, sf::Color(225, 100, 100), sf::Color::White, "Exit"));
+    playing_header_button_list.push(new Button(Config::SCREEN_WIDTH - BUTTON_WIDTH - (BUTTON_WIDTH / 2), Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), 75, 50, 10, sf::Color(255, 200, 60), sf::Color::White, "Create Map"));
+    playing_header_button_list.push(new Button(Config::SCREEN_WIDTH - 5 * (BUTTON_WIDTH - (BUTTON_WIDTH / 2)), Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), 75, 50, 10, sf::Color(255, 200, 60), sf::Color::White, "Load Map"));
+
+    (*editing_header_button_list.get_buttons())[0]->set_function([&e, &game_state]()
+                                                                 { 
+                                                                    if (e.is_initilized())
+                                                                    {
+                                                                        e.reset();
+                                                                    }
+                                                                    game_state = game_states::NO_MAP; });
+
+    (*playing_header_button_list.get_buttons())[0]->set_function([&game_state]()
+                                                                 { game_state = game_states::EDITING; });
+
+    (*playing_header_button_list.get_buttons())[1]->set_function([&game_state, &e, &loading_map_body_button_list, &d, &buffer_direction, &intended_direction, &MAP_BUTTON_WIDTH]()
+                                                                 { 
+                                                                    game_state = game_states::LOADING_MAP;
+                                                                    std::vector<std::string> *maps = e.get_map_editor()->map_files();
+                                                                    loading_map_body_button_list.clear();
+                                                                    for (int m = 0; m < (*maps).size() * 2; m+=2){      
+                                                                        sf::Color background_color; 
+                                                                        m % 2 == 0 ? background_color = sf::Color(224, 224, 224) : background_color = sf::Color(160, 160, 160);
+                                                            
+                                                                        loading_map_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) - (MAP_BUTTON_WIDTH / 2)), Config::HEADER_HEIGHT + (m * BUTTON_HEIGHT) + BUTTON_HEIGHT, MAP_BUTTON_WIDTH, BUTTON_HEIGHT, 20, background_color, sf::Color::Black, (*maps)[m / 2]));
+                                                                        loading_map_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) - (MAP_BUTTON_WIDTH / 2)), Config::HEADER_HEIGHT + (m * BUTTON_HEIGHT) + BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, 20, sf::Color::Red, sf::Color::White, "Delete"));
+                                                                        (*loading_map_body_button_list.get_buttons())[m]->set_function([&game_state, &e, &d, &buffer_direction, &intended_direction, maps, m, &loading_map_body_button_list]()
+                                                                        {  
+                                                                            e.initilize(Config::MAP_DIR + (*maps)[m / 2]);
+                                                                            d.initilize_textures(e.get_board()->get_board(), e.get_board()->get_rows(), e.get_board()->get_cols());                                                                       
+                                                                            buffer_direction = e.get_character(characters::PACMAN)->get_direction();
+                                                                            intended_direction = buffer_direction;
+                                                                            e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());                                                                     
+                                                                            game_state = game_states::PLAYING; 
+                                                                            });
+                                                                    } 
+                                                                   
+                                                                    e.get_map_editor()->clear_map_files(); });
 
     while (window.isOpen())
     {
-        if (!e.get_map_editor()->is_editing())
+        if (game_state == game_states::PLAYING)
         {
             e.get_points()->stringify();
 
@@ -82,21 +130,22 @@ int main()
 
                     // Move pacman
                     int powerup = -1;
-                    e.get_navigation()->move(e.get_character(characters::PACMAN), e.get_board(), direction, e.get_points(), &powerup);
+
+                    e.get_navigation()->move(&d, e.get_character(characters::PACMAN), e.get_board(), direction, e.get_points(), &powerup);
+
                     // If a power pellet was eaten
                     if (powerup == power_types::POWER_PELLET)
                     {
-                        // Set the ghost mode to frightened
-                        e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
-
                         // If a ghost was not already eaten, set its speed to slow down
                         for (int ghost = 0; ghost < 4; ghost++)
                         {
                             if (e.get_state_manager()->get_ghost_state(ghost) != ghost_states::HEADING_BACK)
                             {
+
                                 if (e.get_state_manager()->get_ghost_mode() != ghost_modes::FRIGHTENED)
                                 {
-                                    e.get_speed_manager()->set_threshold(ghost, 400);
+
+                                    e.get_speed_manager()->set_threshold(ghost, Config::FRIGHTENED_GHOST_SPEED);
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->restart();
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(10000);
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &e]()
@@ -108,7 +157,7 @@ int main()
                                 }
                             }
                         }
-                        e.get_state_manager()->overide_mode(10000, ghost_modes::FRIGHTENED);
+                        e.get_state_manager()->overide_mode(Config::FRIGHTENED_TIME, ghost_modes::FRIGHTENED);
                     }
 
                     // Recheck if pacman is able to move his intended direction
@@ -176,7 +225,7 @@ int main()
                     if (e.get_character(ghost))
                     {
                         // Calculate the ghosts new direction given their current state
-                        e.get_ai()->move_based_on_state(e.get_state_manager(), e.get_speed_manager(), ghost, true);
+                        e.get_ai()->move_based_on_state(&d, e.get_state_manager(), e.get_speed_manager(), ghost, true);
                         e.get_speed_manager()->ghost_clocks[ghost]->restart();
                     }
                 }
@@ -198,22 +247,13 @@ int main()
             }
             if (event.type == sf::Event::KeyPressed)
             {
-                if (!e.get_map_editor()->is_editing())
+
+                if (game_state == game_states::PLAYING)
                 {
 
                     bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
 
-                    if (event.key.code == sf::Keyboard::R)
-                    {
-                        e.reset();
-                        e.initilize(Config::MAP_DIR + "map1.txt");
-                        e.get_ai()->move_all(e.get_state_manager(), e.get_speed_manager());
-                    }
-                    else if (event.key.code == sf::Keyboard::E)
-                    {
-                        e.get_map_editor()->toggle_editing(true);
-                    }
-                    else if (event.key.code == sf::Keyboard::W)
+                    if (event.key.code == sf::Keyboard::W)
                     {
                         if (moves[moves::UP] && buffer_direction != moves::UP)
                         {
@@ -289,14 +329,8 @@ int main()
                 }
                 else
                 {
-                    if (event.key.code == sf::Keyboard::P)
-                    {
-                        e.get_map_editor()->toggle_editing(false);
-                        e.get_speed_manager()->restart_all();
-                        player_animation_clock.restart();
-                        e.get_state_manager()->reset();
-                    }
-                    else if (event.key.code == sf::Keyboard::S)
+
+                    if (event.key.code == sf::Keyboard::S)
                     {
                         e.get_map_editor()->array_to_file();
                     }
@@ -304,17 +338,46 @@ int main()
             }
             else if (event.type == sf::Event::MouseButtonReleased)
             {
-                if (e.get_map_editor()->is_editing())
+                float x = sf::Mouse::getPosition(window).x;
+                float y = sf::Mouse::getPosition(window).y;
+
+                if (game_state == game_states::LOADING_MAP)
                 {
-                    float x = sf::Mouse::getPosition(window).x;
-                    float y = sf::Mouse::getPosition(window).y;
+                    y -= Config::HEADER_HEIGHT;
+                    for (int b = 0; b < (*loading_map_body_button_list.get_buttons()).size(); b++)
+                    {
+                        if ((*loading_map_body_button_list.get_buttons())[b]->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
+                        {
+                            (*loading_map_body_button_list.get_buttons())[b]->run_function();
+                        }
+                    }
+                }
+
+                else if (game_state == game_states::PLAYING || game_state == game_states::NO_MAP)
+                {
+                    for (int b = 0; b < (*playing_header_button_list.get_buttons()).size(); b++)
+                    {
+                        if ((*playing_header_button_list.get_buttons())[b]->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
+                        {
+                            (*playing_header_button_list.get_buttons())[b]->run_function();
+                        }
+                    }
+                }
+                else if (game_state == game_states::EDITING)
+                {
+
+                    for (int b = 0; b < (*editing_header_button_list.get_buttons()).size(); b++)
+                    {
+                        if ((*editing_header_button_list.get_buttons())[b]->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
+                        {
+                            (*editing_header_button_list.get_buttons())[b]->run_function();
+                        }
+                    }
 
                     y -= (Config::HEADER_HEIGHT + Config::BODY_HEIGHT);
                     for (int i = 0; i < e.get_map_editor()->get_tile_set()->size(); i++)
                     {
-                        sf::FloatRect bounding_box = (*(e.get_map_editor()->get_tile_set()))[i].get_rect().getGlobalBounds();
-
-                        if (bounding_box.contains(x, y))
+                        if ((*(e.get_map_editor()->get_tile_set()))[i].get_rect().getGlobalBounds().contains(x, y))
                         {
                             e.get_map_editor()->select_tile(x, y);
                         }
@@ -323,7 +386,7 @@ int main()
                     y += Config::BODY_HEIGHT;
                     if (y >= 0 && y <= Config::BODY_HEIGHT)
                     {
-                        e.get_map_editor()->add_tile(x, y);
+                        e.get_map_editor()->add_tile(&d, x, y);
                     }
                 }
             }
@@ -331,7 +394,7 @@ int main()
 
         d.clear_all();
 
-        if (!(e.get_map_editor()->is_editing()))
+        if (game_state == game_states::PLAYING)
         {
             d.draw_board(e.get_board()->get_board(), e.get_board()->get_rows(), e.get_board()->get_cols());
 
@@ -351,7 +414,7 @@ int main()
             {
                 d.draw_all_ghosts(e.get_all_characters(), e.get_board()->get_rows(), e.get_board()->get_cols());
 
-                e.get_ai()->move_all(e.get_state_manager(), e.get_speed_manager());
+                e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());
 
                 e.get_life_manager()->set_collision(false);
             }
@@ -384,12 +447,22 @@ int main()
 
             delete[] moves;
 
+            d.draw_buttons(playing_header_button_list.get_buttons(), texture_surfaces::HEADER);
             d.draw_score(e.get_points());
         }
-        else
+        else if (game_state == game_states::EDITING)
         {
             d.draw_board(e.get_map_editor()->get_board(), e.get_map_editor()->get_n_rows(), e.get_map_editor()->get_n_cols(), true);
             d.draw_tiles(e.get_map_editor()->get_tile_set());
+            d.draw_buttons(editing_header_button_list.get_buttons(), texture_surfaces::HEADER);
+        }
+        else if (game_state == game_states::NO_MAP)
+        {
+            d.draw_buttons(playing_header_button_list.get_buttons(), texture_surfaces::HEADER);
+        }
+        else if (game_state == game_states::LOADING_MAP)
+        {
+            d.draw_buttons(loading_map_body_button_list.get_buttons(), texture_surfaces::BODY);
         }
 
         d.draw_all();

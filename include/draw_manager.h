@@ -16,6 +16,7 @@
 #include "tile.h"
 #include "config.h"
 #include "json.h"
+#include "button.h"
 
 #include <iostream>
 #include <string>
@@ -24,7 +25,6 @@ class Draw_Manager
 {
 private:
     Texture_Manager texture_manager;
-    Text_Manager text_manager{"fonts/ranchos.otf"};
 
     sf::RenderWindow *window;
     sf::RenderTexture *header;
@@ -32,7 +32,6 @@ private:
     sf::RenderTexture *footer;
 
     const int TEXT_HEIGHT = 36;
-    int nRows, nCols;
 
     float *lerp(int x1, int y1, int x2, int y2, float tick);
     void handle_rotation(Occupant *occupant, sf::RectangleShape &cell, int direction, int cell_width, int cell_height);
@@ -43,8 +42,9 @@ private:
     void draw_ghost_eyes(Occupant *ghost, float x, float y, int cell_width, int cell_height);
 
 public:
-    Draw_Manager(sf::RenderWindow &w, sf::RenderTexture &h, sf::RenderTexture &b, sf::RenderTexture &f, int rows, int cols);
+    Draw_Manager(sf::RenderWindow &w, sf::RenderTexture &h, sf::RenderTexture &b, sf::RenderTexture &f);
 
+    void initilize_textures(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols);
     void draw_board(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols, bool outline = false);
     void pacman_animation(Occupant *pacman, int x, int y, int target_x, int target_y, int direction, float tick, int n_rows, int n_cols);
 
@@ -57,6 +57,8 @@ public:
     void draw_tiles(std::vector<Tile> *tiles);
 
     void set_texture(sf::RectangleShape &cell, int type, int specific_type, bool toggled = true);
+
+    void draw_buttons(std::vector<Button *> *buttons, int texture_surface);
 
     void clear_all();
     void draw_all();

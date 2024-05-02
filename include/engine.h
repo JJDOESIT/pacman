@@ -23,6 +23,7 @@
 class Engine
 {
 private:
+    bool initilized = false;
     Occupant *characters[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
     Board board;
     State_Manager *state_manager;
@@ -35,8 +36,8 @@ private:
     Map_Editor map_editor;
 
 public:
-    Engine(std::string map_name);
     ~Engine();
+    bool is_initilized();
     Occupant *get_character(int character);
     Occupant **get_all_characters();
     bool check_collision();

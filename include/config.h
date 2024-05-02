@@ -3,6 +3,8 @@
 
 #include "enum.h"
 #include <string>
+#include <fstream>
+#include <iostream>
 
 class Config
 {
@@ -28,15 +30,18 @@ public:
     static inline int SCATTER_TIME = 7000;
     static inline int CHASE_TIME = 20000;
     static inline int DISABLE_TIME = 5000;
+    static inline int FRIGHTENED_TIME = 10000;
 
     static inline int PACMAN_SPEED = 200;
     static inline int GHOST_SPEED = 300;
-    static inline int FRIGHTENED_GHOST_SPEED = 400;
+    static inline int FRIGHTENED_GHOST_SPEED = 500;
 
     static inline int BORDER_OUTLINE_THICKNESS = 1;
 
     static inline std::string MAP_DIR = "maps/";
     static inline std::string JSON_DIR = "json/";
+
+    static void read(std::string config_path);
 };
 
 #endif

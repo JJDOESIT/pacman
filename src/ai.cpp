@@ -254,7 +254,7 @@ void AI::return_to_start(State_Manager *state_manager, int ghost)
 }
 
 // Move ghosts based on their current state and mode
-void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_manager, int ghost, bool move)
+void AI::move_based_on_state(Draw_Manager *draw_manager, State_Manager *state_manager, Speed_Manager *speed_manager, int ghost, bool move)
 {
     Occupant *occupant = characters[ghost];
 
@@ -269,7 +269,7 @@ void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_
         // Else if the ghost is not disabled or if the ghost is at the escape tile (since we want to move the ghost once more)
         else if (state_manager->get_ghost_state(ghost) != ghost_states::DISABLED || state_manager->has_escaped(occupant))
         {
-            n->move(characters[ghost], b, occupant->get_direction());
+            n->move(draw_manager, characters[ghost], b, occupant->get_direction());
         }
     }
 
@@ -361,12 +361,12 @@ void AI::move_based_on_state(State_Manager *state_manager, Speed_Manager *speed_
 }
 
 // Move all ghosts
-void AI::move_all(State_Manager *state_manager, Speed_Manager *speed_manager)
+void AI::move_all(Draw_Manager *draw_manager, State_Manager *state_manager, Speed_Manager *speed_manager)
 {
-    move_based_on_state(state_manager, speed_manager, ghosts_types::BLINKY);
-    move_based_on_state(state_manager, speed_manager, ghosts_types::PINKY);
-    move_based_on_state(state_manager, speed_manager, ghosts_types::INKY);
-    move_based_on_state(state_manager, speed_manager, ghosts_types::CLYDE);
+    move_based_on_state(draw_manager, state_manager, speed_manager, ghosts_types::BLINKY);
+    move_based_on_state(draw_manager, state_manager, speed_manager, ghosts_types::PINKY);
+    move_based_on_state(draw_manager, state_manager, speed_manager, ghosts_types::INKY);
+    move_based_on_state(draw_manager, state_manager, speed_manager, ghosts_types::CLYDE);
 }
 
 void AI::set_target_tiles()

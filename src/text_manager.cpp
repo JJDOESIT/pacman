@@ -1,24 +1,25 @@
 #include "text_manager.h"
 
-Text_Manager::Text_Manager(std::string font_name)
+// Set the text to correspond to the given parameters (text, size, color)
+void Text_Manager::set_text(sf::Text *t, std::string text, int size, sf::Color color)
 {
-    if (!f.loadFromFile(font_name))
+    t->setCharacterSize(size);
+    t->setFillColor(color);
+}
+
+// Set the font of the given text
+void Text_Manager::set_font(sf::Text *t, sf::Font *f, std::string font_name)
+{
+    if (!f->loadFromFile(font_name))
     {
+        std::cout << "Error: Cannot open font file ..." << std::endl;
         exit(1);
     };
-    t.setFont(f);
+    t->setFont(*f);
 }
 
-// Set the text to correspond to the given parameters (text, size, color)
-void Text_Manager::set_text(std::string text, int size, sf::Color color)
+// Set the position of the given text
+void Text_Manager::set_position(sf::Text *t, float x, float y)
 {
-    t.setString(text);
-    t.setCharacterSize(size);
-    t.setFillColor(color);
-}
-
-// Return a copy of the text
-sf::Text Text_Manager::get_text()
-{
-    return t;
+    t->setPosition(sf::Vector2f(x, y));
 }
