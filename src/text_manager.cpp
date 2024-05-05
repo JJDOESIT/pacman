@@ -3,6 +3,7 @@
 // Set the text to correspond to the given parameters (text, size, color)
 void Text_Manager::set_text(sf::Text *t, std::string text, int size, sf::Color color)
 {
+    t->setString(text);
     t->setCharacterSize(size);
     t->setFillColor(color);
 }

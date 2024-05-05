@@ -42,14 +42,17 @@ void Draw_Manager::draw_score(Points *p)
 }
 
 // Draw the tile set for the map editor
-void Draw_Manager::draw_tiles(std::vector<Tile> *tiles)
+void Draw_Manager::draw_tiles(std::vector<Tile> *tiles, int selected_tile)
 {
-
     for (int i = 0; i < tiles->size(); i++)
     {
-        if ((*tiles)[i].get_is_selected())
+        if (i == selected_tile)
         {
-            (*tiles)[i].get_rect().setFillColor(sf::Color(255, 255, 255, 128));
+            (*tiles)[i].get_rect().setOutlineColor(sf::Color::Red);
+        }
+        else
+        {
+            (*tiles)[i].get_rect().setOutlineColor(sf::Color::White);
         }
         footer->draw((*tiles)[i].get_rect());
     }
@@ -191,8 +194,50 @@ void Draw_Manager::draw_buttons(std::vector<Button *> *buttons, int texture_surf
     }
 }
 
-void Draw_Manager::initilize_textures(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols)
+// Draw all the inputs in a given input list
+void Draw_Manager::draw_inputs(std::vector<Input *> *inputs, int selected_input, int texture_surface)
 {
+    for (int b = 0; b < (*inputs).size(); b++)
+    {
+        sf::Uint8 red = (*(*inputs)[b]->get_cell()).getFillColor().r;
+        sf::Uint8 green = (*(*inputs)[b]->get_cell()).getFillColor().g;
+        sf::Uint8 blue = (*(*inputs)[b]->get_cell()).getFillColor().b;
+        if (b == selected_input)
+        {
+            (*(*inputs)[b]->get_cell()).setFillColor(sf::Color(red, green, blue, 200));
+        }
+        else
+        {
+            (*(*inputs)[b]->get_cell()).setFillColor(sf::Color(red, green, blue));
+        }
+        if (texture_surface == texture_surfaces::HEADER)
+        {
+            header->draw(*(*inputs)[b]->get_cell());
+            header->draw(*(*inputs)[b]->get_text());
+            header->draw(*(*inputs)[b]->get_label_text());
+        }
+        else if (texture_surface == texture_surfaces::BODY)
+        {
+            body->draw(*(*inputs)[b]->get_cell());
+            body->draw(*(*inputs)[b]->get_text());
+            body->draw(*(*inputs)[b]->get_label_text());
+        }
+        else if (texture_surface == texture_surfaces::FOOTER)
+        {
+            footer->draw(*(*inputs)[b]->get_cell());
+            footer->draw(*(*inputs)[b]->get_text());
+            footer->draw(*(*inputs)[b]->get_label_text());
+        }
+    }
+}
+
+// Given a board, initilize the textures
+void Draw_Manager::initilize_textures(Board *b)
+{
+    std::vector<std::vector<Occupant_List>> *board = b->get_board();
+    int n_rows = b->get_rows();
+    int n_cols = b->get_cols();
+
     for (int row = 0; row < n_rows; row++)
     {
         for (int col = 0; col < n_cols; col++)
@@ -229,8 +274,12 @@ void Draw_Manager::initilize_textures(std::vector<std::vector<Occupant_List>> *b
 }
 
 // Draw the board
-void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols, bool outline)
+void Draw_Manager::draw_board(Board *b, bool outline)
 {
+    std::vector<std::vector<Occupant_List>> board = (*b->get_board());
+    int n_rows = b->get_rows();
+    int n_cols = b->get_cols();
+
     int cell_width, cell_height;
 
     for (int row = 0; row < n_rows; row++)
@@ -239,38 +288,38 @@ void Draw_Manager::draw_board(std::vector<std::vector<Occupant_List>> *board, in
         {
             sf::RectangleShape *cell;
             // If the cell is a wall
-            if ((*board)[row][col].find_occupant(type::WALL))
+            if (board[row][col].find_occupant(type::WALL))
             {
-                cell = (*board)[row][col].find_occupant(type::WALL)->get_cell();
+                cell = board[row][col].find_occupant(type::WALL)->get_cell();
             }
             // If the cell is a coin
-            else if ((*board)[row][col].find_occupant(type::COIN))
+            else if (board[row][col].find_occupant(type::COIN))
             {
-                cell = (*board)[row][col].find_occupant(type::COIN)->get_cell();
+                cell = board[row][col].find_occupant(type::COIN)->get_cell();
             }
             // If the cell is a portal
-            else if ((*board)[row][col].find_occupant(type::PORTAL))
+            else if (board[row][col].find_occupant(type::PORTAL))
             {
-                cell = (*board)[row][col].find_occupant(type::PORTAL)->get_cell();
+                cell = board[row][col].find_occupant(type::PORTAL)->get_cell();
             }
             // Else if the cell is a power up
-            else if ((*board)[row][col].find_occupant(type::POWER))
+            else if (board[row][col].find_occupant(type::POWER))
             {
-                cell = (*board)[row][col].find_occupant(type::POWER)->get_cell();
+                cell = board[row][col].find_occupant(type::POWER)->get_cell();
             }
 
             // Note: Ghost and pacman should only be drawn while editing. This is
             //       because during gameplay, the ghosts and pacman are drawn seperate.
 
             // Else if the cell is a ghost
-            else if ((*board)[row][col].find_occupant(type::GHOST))
+            else if (board[row][col].find_occupant(type::GHOST))
             {
-                cell = (*board)[row][col].find_occupant(type::GHOST)->get_cell();
+                cell = board[row][col].find_occupant(type::GHOST)->get_cell();
             }
             // Else if the cell is pacman
-            else if ((*board)[row][col].find_occupant(type::PLAYER))
+            else if (board[row][col].find_occupant(type::PLAYER))
             {
-                cell = (*board)[row][col].find_occupant(type::PLAYER)->get_cell();
+                cell = board[row][col].find_occupant(type::PLAYER)->get_cell();
             }
 
             if (outline)

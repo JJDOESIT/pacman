@@ -40,6 +40,7 @@ public:
 
     static inline std::string MAP_DIR = "maps/";
     static inline std::string JSON_DIR = "json/";
+    static inline std::string FONT_DIR = "fonts/";
 
     static void read(std::string config_path);
 };

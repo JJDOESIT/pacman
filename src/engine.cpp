@@ -15,7 +15,7 @@ void Engine::initilize(std::string map_name)
     {
         reset();
     }
-    text_to_array(map_name);
+    file_to_array(map_name);
     state_manager = new State_Manager{ghost_states::ESCAPING};
     navigation = new Navigation{state_manager};
     speed_manager = new Speed_Manager{state_manager, Config::PACMAN_SPEED, Config::GHOST_SPEED};
@@ -44,7 +44,7 @@ void Engine::reset()
 }
 
 // Fill the board array from the given text file
-void Engine::text_to_array(std::string map_name)
+void Engine::file_to_array(std::string map_name)
 {
     std::ifstream infile;
 
@@ -97,7 +97,7 @@ void Engine::text_to_array(std::string map_name)
                 else if (type == type::PLAYER)
                 {
                     row_vector.push_back(Occupant_List(new Coin(current_row, current_col, false)));
-                    characters[characters::game_characters::PACMAN] = new Pacman(current_row, current_col, moves::UP);
+                    characters[characters::game_characters::PACMAN] = new Pacman(current_row, current_col, Config::DEFAULT_PACMAN_DIRECTION);
                     row_vector[current_col].push(characters[characters::game_characters::PACMAN]);
                     is_tile = true;
                 }

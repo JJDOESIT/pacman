@@ -6,6 +6,7 @@
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
 
 #include <fstream>
 #include <string>
@@ -21,6 +22,8 @@ public:
     static std::string get_string_from_object(rapidjson::Value *object, std::string key);
     static rapidjson::Document *get_document(std::string file_name);
     static rapidjson::Value *get_object(rapidjson::Document *document, std::string key);
+    static void add_int_to_array(std::string file_name, rapidjson::Document *document, rapidjson::Value *array, int value);
+    static void remove_int_from_array(std::string file_name, rapidjson::Document *document, rapidjson::Value *array, int value);
 };
 
 #endif

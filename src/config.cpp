@@ -36,23 +36,7 @@ void Config::read(std::string config_path)
         }
         index_found = false;
 
-        if (key == "SCREEN_WIDTH")
-        {
-            SCREEN_WIDTH = std::stoi(value);
-        }
-        else if (key == "BODY_HEIGHT")
-        {
-            BODY_HEIGHT = std::stoi(value);
-        }
-        else if (key == "HEADER_HEIGHT")
-        {
-            HEADER_HEIGHT = std::stoi(value);
-        }
-        else if (key == "FOOTER_HEIGHT")
-        {
-            FOOTER_HEIGHT = std::stoi(value);
-        }
-        else if (key == "N_PACMAN_LIVES")
+        if (key == "N_PACMAN_LIVES")
         {
             N_PACMAN_LIVES = std::stoi(value);
         }
@@ -99,18 +83,6 @@ void Config::read(std::string config_path)
         else if (key == "FRIGHTENED_GHOST_SPEED")
         {
             FRIGHTENED_GHOST_SPEED = std::stoi(value);
-        }
-        else if (key == "BORDER_OUTLINE_THICKNESS")
-        {
-            BORDER_OUTLINE_THICKNESS = std::stoi(value);
-        }
-        else if (key == "MAP_DIR")
-        {
-            MAP_DIR = value;
-        }
-        else if (key == "JSON_DIR")
-        {
-            JSON_DIR = value;
         }
 
         key.clear();

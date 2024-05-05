@@ -1,6 +1,7 @@
 #ifndef _DRAW_MANAGER_
 #define _DRAW_MANAGER_
 
+#include "board.h"
 #include "texture_manager.h"
 #include "occupant_list.h"
 #include "wall.h"
@@ -17,6 +18,7 @@
 #include "config.h"
 #include "json.h"
 #include "button.h"
+#include "input.h"
 
 #include <iostream>
 #include <string>
@@ -44,8 +46,8 @@ private:
 public:
     Draw_Manager(sf::RenderWindow &w, sf::RenderTexture &h, sf::RenderTexture &b, sf::RenderTexture &f);
 
-    void initilize_textures(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols);
-    void draw_board(std::vector<std::vector<Occupant_List>> *board, int n_rows, int n_cols, bool outline = false);
+    void initilize_textures(Board *b);
+    void draw_board(Board *b, bool outline = false);
     void pacman_animation(Occupant *pacman, int x, int y, int target_x, int target_y, int direction, float tick, int n_rows, int n_cols);
 
     void draw_all_ghost_animation(State_Manager *state_manager, Occupant **characters, Speed_Manager *speed_manager, int n_rows, int n_cols);
@@ -54,11 +56,13 @@ public:
 
     void draw_score(Points *p);
 
-    void draw_tiles(std::vector<Tile> *tiles);
+    void draw_tiles(std::vector<Tile> *tiles, int selected_tile);
 
     void set_texture(sf::RectangleShape &cell, int type, int specific_type, bool toggled = true);
 
     void draw_buttons(std::vector<Button *> *buttons, int texture_surface);
+
+    void draw_inputs(std::vector<Input *> *inputs, int selected_input, int texture_surface);
 
     void clear_all();
     void draw_all();

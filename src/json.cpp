@@ -104,7 +104,7 @@ rapidjson::Value *Json::get_object(rapidjson::Document *document, std::string ke
         std::cout << "Error: JSON key (" << key << ") not found ..." << std::endl;
         exit(1);
     }
-    else if (!(*document)[key.c_str()].IsObject())
+    else if (!(*document)[key.c_str()].IsObject() && !(*document)[key.c_str()].IsArray())
     {
         std::cout << "Error: JSON object (" << key << ") is not an object ..." << std::endl;
         exit(1);
@@ -113,4 +113,56 @@ rapidjson::Value *Json::get_object(rapidjson::Document *document, std::string ke
     rapidjson::Value *value = new rapidjson::Value;
     value = &((*document)[key.c_str()]);
     return value;
+}
+
+// Add a new int value to a given array
+void Json::add_int_to_array(std::string file_name, rapidjson::Document *document, rapidjson::Value *array, int value)
+{
+    // Check if the given object is an array
+    if (!array->IsArray())
+    {
+        std::cout << "Error: JSON object is not an array ..." << std::endl;
+    }
+
+    // Add new value to the array
+    array->PushBack(value, document->GetAllocator());
+
+    // Convert the document back to a JSON string
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    document->Accept(writer);
+
+    // Write the updated JSON back to the file
+    std::ofstream ofs(file_name);
+    ofs << buffer.GetString();
+    ofs.close();
+}
+
+// Remove a given int from the given array
+void Json::remove_int_from_array(std::string file_name, rapidjson::Document *document, rapidjson::Value *array, int value)
+{
+    // Check if the given object is an array
+    if (!array->IsArray())
+    {
+        std::cout << "Error: JSON object is not an array ..." << std::endl;
+    }
+
+    // Remove given value from the array
+    for (rapidjson::SizeType i = 0; i < array->Size(); i++)
+    {
+        if (value == (*array)[i].GetInt())
+        {
+            array->Erase(array->Begin() + i);
+        }
+    }
+
+    // Convert the document back to a JSON string
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    document->Accept(writer);
+
+    // Write the updated JSON back to the file
+    std::ofstream ofs(file_name);
+    ofs << buffer.GetString();
+    ofs.close();
 }

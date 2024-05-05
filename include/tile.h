@@ -19,8 +19,6 @@ public:
     int get_type();
     int get_specific_type();
     int get_toggled();
-    void set_is_selected(bool selected);
-    bool get_is_selected();
     sf::RectangleShape &get_rect();
 };
 

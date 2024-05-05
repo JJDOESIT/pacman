@@ -3,6 +3,7 @@
 
 #include "SFML/Graphics.hpp"
 #include "text_manager.h"
+#include "config.h"
 
 #include <functional>
 #include <string>

@@ -117,6 +117,7 @@ enum game_states
     EDITING,
     LOADING_MAP,
     LOADING_CONFIG,
+    SELECTING_SIZE,
 };
 
 #endif

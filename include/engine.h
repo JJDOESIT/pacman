@@ -49,7 +49,7 @@ public:
     State_Manager *get_state_manager();
     Speed_Manager *get_speed_manager();
     Map_Editor *get_map_editor();
-    void text_to_array(std::string map_name);
+    void file_to_array(std::string map_name);
     void reset();
     void initilize(std::string map_name);
 };

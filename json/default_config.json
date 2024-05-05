@@ -1,9 +1,5 @@
 {
     "config": {
-        "SCREEN_WIDTH": 560,
-        "BODY_HEIGHT": 620,
-        "HEADER_HEIGHT": 100,
-        "FOOTER_HEIGHT": 100,
         "N_PACMAN_LIVES": 3,
         "DEFAULT_PACMAN_DIRECTION": 0,
         "DEFAULT_BLINKY_DIRECTION": 1,
@@ -32,10 +28,6 @@
         "FRIGHTENED_TIME": 10000,
         "PACMAN_SPEED": 200,
         "GHOST_SPEED": 300,
-        "FRIGHTENED_GHOST_SPEED": 500,
-        "BORDER_OUTLINE_THICKNESS": 1,
-        "MAP_DIR": "maps/",
-        "JSON_DIR": "json/",
-        "CONFIG_DIR": "config/"
+        "FRIGHTENED_GHOST_SPEED": 500
     }
 }
