@@ -231,6 +231,23 @@ void Draw_Manager::draw_inputs(std::vector<Input *> *inputs, int selected_input,
     }
 }
 
+// Draw a given number of pacman lives
+void Draw_Manager::draw_lives(int n_pacman_lives)
+{
+    if (n_pacman_lives > 0)
+    {
+        int cell_size = std::min(int((Config::SCREEN_WIDTH / 2) / n_pacman_lives), int(Config::FOOTER_HEIGHT * 0.5));
+
+        for (int l = 0; l < n_pacman_lives; l++)
+        {
+            sf::RectangleShape cell(sf::Vector2f(cell_size, cell_size));
+            set_texture(cell, type::PLAYER, 0);
+            cell.setPosition(sf::Vector2f(cell_size * l, (Config::FOOTER_HEIGHT / 2) - (cell_size / 2)));
+            footer->draw(cell);
+        }
+    }
+}
+
 // Given a board, initilize the textures
 void Draw_Manager::initilize_textures(Board *b)
 {

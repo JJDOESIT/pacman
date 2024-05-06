@@ -29,7 +29,7 @@ private:
     int portal_index;
     int n_in_tile_row;
 
-    void add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type = 0);
+    void add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type = 0, bool toggled = true);
     float get_mouse_position(int number, int cell_width, int offset = 0);
 
     void create_config_file(int map_count);

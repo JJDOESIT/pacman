@@ -23,6 +23,12 @@ bool Life_Manager::get_collision()
     return collision;
 }
 
+// Return the number of pacman lives
+int Life_Manager::get_n_lives()
+{
+    return n_pacman_lives;
+}
+
 // Reset lives
 void Life_Manager::reset()
 {

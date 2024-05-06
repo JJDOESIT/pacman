@@ -15,6 +15,7 @@ public:
     void decrement();
     void set_collision(bool c);
     bool get_collision();
+    int get_n_lives();
     void reset();
 };
 

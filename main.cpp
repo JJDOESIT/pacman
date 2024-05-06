@@ -279,6 +279,8 @@ int main()
                     e.get_speed_manager()->reset_all();
                     e.get_speed_manager()->pacman_clock->restart();
                     e.get_navigation()->reset_all_characters(e.get_board(), e.get_all_characters());
+                    buffer_direction = e.get_character(characters::PACMAN)->get_direction();
+                    intended_direction = buffer_direction;
                     e.get_state_manager()->reset();
                 }
                 else
@@ -567,6 +569,7 @@ int main()
 
             d.draw_buttons(playing_header_button_list.get_buttons(), texture_surfaces::HEADER);
             d.draw_score(e.get_points());
+            d.draw_lives(e.get_life_manager()->get_n_lives());
         }
         else if (game_state == game_states::EDITING)
         {

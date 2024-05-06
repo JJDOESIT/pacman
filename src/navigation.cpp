@@ -275,12 +275,14 @@ void Navigation::reset_position(Board *board, Occupant *occupant)
     {
         (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].pop_specific_occupant(occupant);
         occupant->set_position(static_cast<Pacman *>(occupant)->get_initial_x(), static_cast<Pacman *>(occupant)->get_initial_y());
+        occupant->set_direction(static_cast<Pacman *>(occupant)->get_initial_direction());
         (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].push(occupant);
     }
     else if (occupant->get_type() == type::GHOST)
     {
         (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].pop_specific_occupant(occupant);
         occupant->set_position(static_cast<Ghost *>(occupant)->get_initial_x(), static_cast<Ghost *>(occupant)->get_initial_y());
+        occupant->set_direction(static_cast<Ghost *>(occupant)->get_initial_direction());
         (*board->get_board())[occupant->get_x_position()][occupant->get_y_position()].push(occupant);
     }
 }

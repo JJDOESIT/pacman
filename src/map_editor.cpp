@@ -48,10 +48,10 @@ void Map_Editor::create_map(int n_rows, int n_cols)
 
     tiles.push_back(Tile(type::WALL, wall_type::GATE));
 
+    tiles.push_back(Tile(type::WALL, wall_type::FILLED));
+
     tiles.push_back(Tile(type::WALL, wall_type::TOPLEFTCORNERCONNECTORVERTICAL));
     tiles.push_back(Tile(type::WALL, wall_type::TOPRIGHTCORNERCONNECTORVERTICAL));
-
-    tiles.push_back(Tile(type::WALL, wall_type::FILLED));
 
     tiles.push_back(Tile(type::WALL, wall_type::BOTTOMLEFTCORNERCONNECTORVERTICAL));
     tiles.push_back(Tile(type::WALL, wall_type::BOTTOMRIGHTCORNERCONNECTORVERTICAL));
@@ -67,6 +67,9 @@ void Map_Editor::create_map(int n_rows, int n_cols)
 
     tiles.push_back(Tile(type::WALL, wall_type::STRAIGHTVERTICALMIDDLELEFT));
     tiles.push_back(Tile(type::WALL, wall_type::STRAIGHTVERTICALMIDDLERIGHT));
+
+    tiles.push_back(Tile(type::COIN, 0));
+    tiles.push_back(Tile(type::COIN, 0, false));
 
     tiles.push_back(Tile(type::PLAYER));
     tiles.push_back(Tile(type::GHOST, ghosts_types::BLINKY));
@@ -460,7 +463,7 @@ int Map_Editor::find_int_substring(std::string string)
 }
 
 // Add a specific occupant to the board
-void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type)
+void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type, bool toggled)
 {
     // Clear the occupant list
     (*board.get_board())[row][col].clear();
@@ -491,7 +494,7 @@ void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int
     }
     else if (type == type::COIN)
     {
-        occupant = new Coin(row, col, specific_type);
+        occupant = new Coin(row, col, toggled);
     }
     else if (type == type::PLAYER)
     {
@@ -499,11 +502,11 @@ void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int
     }
     else if (type == type::POWER)
     {
-        occupant = new Power(row, col, specific_type);
+        occupant = new Power(row, col, specific_type, toggled);
     }
 
     // Set the texture of the newly created occupant
-    draw_manager->set_texture(*occupant->get_cell(), type, specific_type);
+    draw_manager->set_texture(*occupant->get_cell(), type, specific_type, toggled);
 
     // Push the new occupant onto the board
     (*board.get_board())[row][col].push(occupant);
@@ -568,7 +571,7 @@ void Map_Editor::add_tile(Draw_Manager *draw_manager, float x, float y)
         float cell_height = Config::BODY_HEIGHT / board.get_rows();
         x = get_mouse_position(x, cell_width);
         y = get_mouse_position(y, cell_height);
-        add(draw_manager, y, x, tiles[selected_tile].get_type(), tiles[selected_tile].get_specific_type());
+        add(draw_manager, y, x, tiles[selected_tile].get_type(), tiles[selected_tile].get_specific_type(), tiles[selected_tile].get_toggled());
     }
 }
 

@@ -64,6 +64,8 @@ public:
 
     void draw_inputs(std::vector<Input *> *inputs, int selected_input, int texture_surface);
 
+    void draw_lives(int n_pacman_lives);
+
     void clear_all();
     void draw_all();
 };
