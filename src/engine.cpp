@@ -8,6 +8,25 @@ Engine::~Engine()
     }
 }
 
+void Engine::initilize()
+{
+    if (initilized)
+    {
+        reset();
+    }
+    const int ALERT_WIDTH = Config::SCREEN_WIDTH / 2;
+    const int ALERT_HEIGHT = Config::BODY_HEIGHT / 8;
+    const int ALERT_CHAR_SIZE = 26;
+    alert.initilize((Config::SCREEN_WIDTH / 2) - (ALERT_WIDTH / 2), (Config::BODY_HEIGHT / 2) - (ALERT_HEIGHT / 2), ALERT_WIDTH, ALERT_HEIGHT, ALERT_CHAR_SIZE, sf::Color(248, 215, 218), sf::Color(114, 28, 36));
+    life_manager = new Life_Manager{Config::N_PACMAN_LIVES};
+    state_manager = new State_Manager{ghost_states::ESCAPING};
+    navigation = new Navigation{state_manager};
+    speed_manager = new Speed_Manager{state_manager, Config::PACMAN_SPEED, Config::GHOST_SPEED};
+    ai = new AI{&board, navigation, characters};
+    ai->set_target_tiles();
+    initilized = true;
+}
+
 // Initilize the game engine
 void Engine::initilize(std::string map_name)
 {
@@ -15,7 +34,12 @@ void Engine::initilize(std::string map_name)
     {
         reset();
     }
+    const int ALERT_WIDTH = Config::SCREEN_WIDTH / 2;
+    const int ALERT_HEIGHT = Config::BODY_HEIGHT / 8;
+    const int ALERT_CHAR_SIZE = 26;
+    alert.initilize((Config::SCREEN_WIDTH / 2) - (ALERT_WIDTH / 2), (Config::BODY_HEIGHT / 2) - (ALERT_HEIGHT / 2), ALERT_WIDTH, ALERT_HEIGHT, ALERT_CHAR_SIZE, sf::Color(248, 215, 218), sf::Color(114, 28, 36));
     file_to_array(map_name);
+    life_manager = new Life_Manager{Config::N_PACMAN_LIVES};
     state_manager = new State_Manager{ghost_states::ESCAPING};
     navigation = new Navigation{state_manager};
     speed_manager = new Speed_Manager{state_manager, Config::PACMAN_SPEED, Config::GHOST_SPEED};
@@ -35,7 +59,8 @@ void Engine::reset()
     portals.clear();
     points.reset();
     state_manager->reset();
-    life_manager.reset();
+    alert.reset();
+    delete life_manager;
     delete state_manager;
     delete navigation;
     delete speed_manager;
@@ -91,6 +116,10 @@ void Engine::file_to_array(std::string map_name)
                 else if (type == type::COIN)
                 {
                     toggled = Json::get_int_from_object(&(tile->value), "toggled");
+                    if (toggled)
+                    {
+                        points.increament_coins();
+                    }
                     row_vector.push_back(Occupant_List(new Coin(current_row, current_col, toggled)));
                     is_tile = true;
                 }
@@ -203,12 +232,15 @@ void Engine::file_to_array(std::string map_name)
         current_col++;
     }
 
+    map_editor.set_open_map(map_name);
+    points.set_n_initial_coins(points.get_n_coins());
     delete document;
 
+    // If pacman is not placed on the map
     if (!characters[characters::game_characters::PACMAN])
     {
-        std::cout << "Error: Pacman must be placed on the map..." << std::endl;
-        exit(1);
+        alert.set_text("Pacman not placed");
+        alert.set_toggled(true);
     }
 }
 
@@ -216,6 +248,12 @@ void Engine::file_to_array(std::string map_name)
 Speed_Manager *Engine::get_speed_manager()
 {
     return speed_manager;
+}
+
+// Return a pointer to the alert instance
+Alert *Engine::get_alert()
+{
+    return &alert;
 }
 
 // Return a pointer to pacman
@@ -282,7 +320,7 @@ Points *Engine::get_points()
 // Return a pointer to the life manager instance
 Life_Manager *Engine::get_life_manager()
 {
-    return &life_manager;
+    return life_manager;
 }
 
 // Return a pointer to the state manager instance

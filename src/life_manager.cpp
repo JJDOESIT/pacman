@@ -29,6 +29,17 @@ int Life_Manager::get_n_lives()
     return n_pacman_lives;
 }
 
+// Set the number of pacman lives
+void Life_Manager::set_n_lives(int n)
+{
+    n_pacman_lives = n;
+}
+
+bool Life_Manager::is_game_over()
+{
+    return n_pacman_lives == 0;
+}
+
 // Reset lives
 void Life_Manager::reset()
 {

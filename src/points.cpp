@@ -10,6 +10,8 @@ void Points::update(int n)
 void Points::reset()
 {
     n_points = 0;
+    n_coins = 0;
+    n_initial_coins = 0;
     stringify();
 }
 
@@ -39,6 +41,49 @@ void Points::stringify()
         index -= 1;
     }
     text.setString(points_array);
+}
+
+// Increament the total number of coins
+void Points::increament_coins()
+{
+    n_coins++;
+}
+
+// Decreament the total number of coins
+void Points::decreament_coins()
+{
+    n_coins--;
+}
+
+// Set the initial number of coins
+void Points::set_n_initial_coins(int n)
+{
+    n_initial_coins = n;
+}
+
+// Return whether the player has got all the coins or not
+bool Points::has_won()
+{
+    if (n_initial_coins == 0)
+    {
+        return false;
+    }
+    else
+    {
+        return (n_coins == 0);
+    }
+}
+
+// Return the total number of points
+int Points::get_n_points()
+{
+    return n_points;
+}
+
+// Return the total number of coins
+int Points::get_n_coins()
+{
+    return n_coins;
 }
 
 // Return a pointer to the sf::Text reference

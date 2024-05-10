@@ -16,6 +16,8 @@ public:
     void set_collision(bool c);
     bool get_collision();
     int get_n_lives();
+    void set_n_lives(int n);
+    bool is_game_over();
     void reset();
 };
 

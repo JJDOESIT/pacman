@@ -19,22 +19,7 @@ void Config::read(std::string config_path)
     {
         std::getline(ifstream, line);
 
-        for (int c = 0; c < line.length(); c++)
-        {
-            if (line[c] == '=')
-            {
-                index_found = true;
-            }
-            else if (index_found)
-            {
-                value += line[c];
-            }
-            else
-            {
-                key += line[c];
-            }
-        }
-        index_found = false;
+        scan(line, key, value, '=');
 
         if (key == "N_PACMAN_LIVES")
         {
@@ -84,10 +69,38 @@ void Config::read(std::string config_path)
         {
             FRIGHTENED_GHOST_SPEED = std::stoi(value);
         }
-
-        key.clear();
-        value.clear();
+        else if (key == "BLINKY_ESCAPE_TILE")
+        {
+            std::string x, y;
+            scan(value, x, y, ',');
+            BLINKY_ESCAPE_TILE[0] = std::stoi(x);
+            BLINKY_ESCAPE_TILE[1] = std::stoi(y);
+        }
     }
-
     ifstream.close();
+}
+
+// Parse a line to split it into key and value pair
+void Config::scan(std::string line, std::string &key, std::string &value, char delimiter)
+{
+    key.clear();
+    value.clear();
+
+    bool index_found = false;
+
+    for (int c = 0; c < line.length(); c++)
+    {
+        if (line[c] == delimiter)
+        {
+            index_found = true;
+        }
+        else if (index_found)
+        {
+            value += line[c];
+        }
+        else
+        {
+            key += line[c];
+        }
+    }
 }

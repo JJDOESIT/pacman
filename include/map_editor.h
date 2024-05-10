@@ -54,6 +54,8 @@ public:
     void clear_map_files();
     void clear_board();
     int find_int_substring(std::string string);
+    std::string get_open_map();
+    void set_open_map(std::string m);
 };
 
 #endif

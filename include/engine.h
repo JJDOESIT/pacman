@@ -30,13 +30,15 @@ private:
     Navigation *navigation;
     AI *ai;
     Points points;
-    Life_Manager life_manager{3};
+    Life_Manager *life_manager;
     std::vector<Portal *> portals;
     Speed_Manager *speed_manager;
     Map_Editor map_editor;
+    Alert alert;
 
 public:
     ~Engine();
+    void initilize();
     bool is_initilized();
     Occupant *get_character(int character);
     Occupant **get_all_characters();
@@ -49,6 +51,7 @@ public:
     State_Manager *get_state_manager();
     Speed_Manager *get_speed_manager();
     Map_Editor *get_map_editor();
+    Alert *get_alert();
     void file_to_array(std::string map_name);
     void reset();
     void initilize(std::string map_name);

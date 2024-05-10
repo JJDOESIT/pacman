@@ -192,8 +192,9 @@ void Map_Editor::array_to_file()
     // Increament the map count by one and create a config file
     if (open_map.length() == 0)
     {
-        // create_config_file(map_count);
+        create_config_file(map_count);
         Json::add_int_to_array(Config::JSON_DIR + "map_count.json", document, value, map_count);
+        Json::set_int(Config::JSON_DIR + "map_count.json", "count", Json::get_int(Config::JSON_DIR + "map_count.json", "count") + 1);
     }
 
     delete document;
@@ -460,6 +461,18 @@ int Map_Editor::find_int_substring(std::string string)
     int result = std::stoi(intStr);
 
     return result;
+}
+
+// Return the open map
+std::string Map_Editor::get_open_map()
+{
+    return open_map;
+}
+
+// Set the open map
+void Map_Editor::set_open_map(std::string m)
+{
+    open_map = m;
 }
 
 // Add a specific occupant to the board

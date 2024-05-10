@@ -248,6 +248,18 @@ void Draw_Manager::draw_lives(int n_pacman_lives)
     }
 }
 
+// Draw a given alert
+void Draw_Manager::draw_alert(Alert *alert)
+{
+    if (alert->is_toggled())
+    {
+        body->draw(*alert->get_cell());
+        body->draw(*alert->get_dismiss_button()->get_cell());
+        body->draw(*alert->get_text());
+        body->draw(*alert->get_dismiss_button()->get_text());
+    }
+}
+
 // Given a board, initilize the textures
 void Draw_Manager::initilize_textures(Board *b)
 {

@@ -50,13 +50,25 @@ void Json::set_int(std::string file_name, std::string key, int value)
 
     document.ParseStream(isw);
 
-    document[key.c_str()].SetInt(value);
+    if (!document.HasMember(key.c_str()))
+    {
+        // Handle the case where the key doesn't exist
+        std::cerr << "Key '" << key << "' not found in JSON document." << std::endl;
+    }
+    else
+    {
+        document[key.c_str()].SetInt(value);
 
-    std::ofstream ofstream(file_name);
-    rapidjson::OStreamWrapper osw(ofstream);
-    rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+        // Convert the document back to a JSON string
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        document.Accept(writer);
 
-    document.Accept(writer);
+        // Write the updated JSON back to the file
+        std::ofstream ofs(file_name);
+        ofs << buffer.GetString();
+        ofs.close();
+    }
 }
 
 // Return a string value in the json file

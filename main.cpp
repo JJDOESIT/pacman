@@ -7,10 +7,13 @@
 #include "buttons.h"
 #include "inputs.h"
 #include "config.h"
+#include "alert.h"
 
 int main()
 {
     Engine e;
+
+    e.initilize();
 
     int game_state = game_states::NO_MAP;
 
@@ -108,9 +111,16 @@ int main()
                                                                         if (string_rows.length() > 0 && string_cols.length() > 0){
                                                                             if (std::stoi(string_rows) > 0 && std::stoi(string_cols) > 0)
                                                                             {
-                                                                                e.get_map_editor()->create_map(std::stoi(string_rows), std::stoi(string_cols));
-                                                                                d.initilize_textures(e.get_map_editor()->get_board());
-                                                                                game_state = game_states::EDITING; 
+                                                                                if (Json::get_int(Config::JSON_DIR + "map_count.json", "count") >=5){
+                                                                                    e.get_alert()->set_text("Limit of 5 Maps");
+                                                                                    e.get_alert()->set_toggled(true);
+                                                                                }
+                                                                                else{
+                                                                                    e.get_map_editor()->create_map(std::stoi(string_rows), std::stoi(string_cols));
+                                                                                    d.initilize_textures(e.get_map_editor()->get_board());
+                                                                                    game_state = game_states::EDITING; 
+                                                                                }
+                                                                             
                                                                             }   
                                                                         } });
 
@@ -136,13 +146,17 @@ int main()
                                                                         loading_map_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) + (MAP_BUTTON_WIDTH / 2)), ((m / 3)* MAP_BUTTON_HEIGHT) + ((m / 3) * 5), BUTTON_WIDTH, MAP_BUTTON_HEIGHT, 20, sf::Color::Red, sf::Color::White, "Delete"));
                                                                         // Assign the load function
                                                                         (*loading_map_body_button_list.get_buttons())[m]->set_function([&game_state, &e, &d, &buffer_direction, &intended_direction, maps, m, &loading_map_body_button_list]()
-                                                                        {  
+                                                                        {                        
                                                                             e.initilize(Config::MAP_DIR + (*maps)[m / 3]);
-                                                                            d.initilize_textures(e.get_board());                                                                       
-                                                                            buffer_direction = e.get_character(characters::PACMAN)->get_direction();
-                                                                            intended_direction = buffer_direction;
-                                                                            e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());                                                                     
-                                                                            game_state = game_states::PLAYING; 
+                                                                            // If there was no error when initilizng the engine
+                                                                            if (!e.get_alert()->is_toggled()){
+                                                                                d.initilize_textures(e.get_board());                                                                       
+                                                                                buffer_direction = e.get_character(characters::PACMAN)->get_direction();
+                                                                                intended_direction = buffer_direction;
+                                                                                e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());                                                                     
+                                                                                game_state = game_states::PLAYING; 
+                                                                            }
+                                                                           
                                                                             });
                                                                         // Assign the edit function 
                                                                         (*loading_map_body_button_list.get_buttons())[m + 1]->set_function([maps, m, &game_state, &d, &e]()
@@ -154,10 +168,13 @@ int main()
                                                                         // Assign the delete function
                                                                         (*loading_map_body_button_list.get_buttons())[m + 2]->set_function([maps, m, &game_state, &e]()
                                                                         {  
+                                                                            int count = e.get_map_editor()->find_int_substring(Config::MAP_DIR + (*maps)[m / 3]);
                                                                             std::remove((Config::MAP_DIR + (*maps)[m / 3]).c_str());
+                                                                            std::remove(("config/config" + std::to_string(count) + ".txt").c_str());
                                                                             rapidjson::Document *document = Json::get_document(Config::JSON_DIR + "map_count.json");
                                                                             rapidjson::Value *array = Json::get_object(document, "taken_maps");
-                                                                            Json::remove_int_from_array(Config::JSON_DIR + "map_count.json", document, array, e.get_map_editor()->find_int_substring(Config::MAP_DIR + (*maps)[m / 3]));
+                                                                            Json::remove_int_from_array(Config::JSON_DIR + "map_count.json", document, array, count);
+                                                                            Json::set_int(Config::JSON_DIR + "map_count.json", "count", Json::get_int(Config::JSON_DIR + "map_count.json", "count") -1);
                                                                             delete document;
                                                                             game_state = game_states::NO_MAP;
                                                                         });
@@ -228,7 +245,7 @@ int main()
 
                                     e.get_speed_manager()->set_threshold(ghost, Config::FRIGHTENED_GHOST_SPEED);
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->restart();
-                                    e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(Config::DISABLE_TIME);
+                                    e.get_state_manager()->get_ghost_state_clock(ghost)->set_threshold(Config::FRIGHTENED_TIME);
                                     e.get_state_manager()->get_ghost_state_clock(ghost)->delay_a_function([ghost, &e]()
                                                                                                           { e.get_speed_manager()->update_ghost_speed(ghost, e.get_speed_manager()->get_initial_time(type::GHOST)); });
                                 }
@@ -282,13 +299,23 @@ int main()
                     buffer_direction = e.get_character(characters::PACMAN)->get_direction();
                     intended_direction = buffer_direction;
                     e.get_state_manager()->reset();
+
+                    // If pacman has ran out of lives
+                    if (e.get_life_manager()->is_game_over())
+                    {
+                        e.get_alert()->set_text("Game Over!");
+                        e.get_alert()->set_toggled(true);
+                        game_state = game_states::NO_MAP;
+                    }
                 }
+                // Else if pacman has eaten a ghost
                 else
                 {
                     std::vector<Occupant *> occupants = (*(e.get_board()->get_board()))[e.get_character(characters::PACMAN)->get_x_position()][e.get_character(characters::PACMAN)->get_y_position()].get_all_occupants(type::GHOST);
                     for (Occupant *occupant : occupants)
                     {
                         e.get_state_manager()->set_ghost_state(static_cast<Ghost *>(occupant)->get_type(), ghost_states::HEADING_BACK);
+                        e.get_points()->update(200);
                         e.get_speed_manager()->set_threshold(static_cast<Ghost *>(occupant)->get_type(), 150);
                     }
                 }
@@ -352,6 +379,33 @@ int main()
             {
                 if (game_state == game_states::PLAYING)
                 {
+                    if (event.key.code == sf::Keyboard::Num0)
+                    {
+                        Config::read("config/config0.txt");
+                        e.initilize(e.get_map_editor()->get_open_map());
+                        d.initilize_textures(e.get_board());
+                        buffer_direction = e.get_character(characters::PACMAN)->get_direction();
+                        intended_direction = buffer_direction;
+                        e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());
+                    }
+                    else if (event.key.code == sf::Keyboard::Num1)
+                    {
+                        Config::read("config/config1.txt");
+                        e.initilize(e.get_map_editor()->get_open_map());
+                        d.initilize_textures(e.get_board());
+                        buffer_direction = e.get_character(characters::PACMAN)->get_direction();
+                        intended_direction = buffer_direction;
+                        e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());
+                    }
+                    else if (event.key.code == sf::Keyboard::Num2)
+                    {
+                        Config::read("config/config10.txt");
+                        e.initilize(e.get_map_editor()->get_open_map());
+                        d.initilize_textures(e.get_board());
+                        buffer_direction = e.get_character(characters::PACMAN)->get_direction();
+                        intended_direction = buffer_direction;
+                        e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());
+                    }
 
                     bool *moves = e.get_navigation()->get_possible_moves(e.get_character(characters::PACMAN), e.get_board());
 
@@ -435,7 +489,16 @@ int main()
                 float x = sf::Mouse::getPosition(window).x;
                 float y = sf::Mouse::getPosition(window).y;
 
-                if (game_state == game_states::SELECTING_SIZE)
+                if (e.get_alert()->is_toggled())
+                {
+                    y -= Config::HEADER_HEIGHT;
+                    if (e.get_alert()->get_dismiss_button()->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
+                    {
+                        e.get_alert()->set_toggled(false);
+                    }
+                }
+
+                else if (game_state == game_states::SELECTING_SIZE)
                 {
                     for (int b = 0; b < (*selecting_size_header_button_list.get_buttons()).size(); b++)
                     {
@@ -569,6 +632,17 @@ int main()
 
             d.draw_buttons(playing_header_button_list.get_buttons(), texture_surfaces::HEADER);
             d.draw_score(e.get_points());
+
+            if (e.get_points()->has_won())
+            {
+                int n_points = e.get_points()->get_n_points();
+                int n_lives = e.get_life_manager()->get_n_lives();
+                e.initilize(e.get_map_editor()->get_open_map());
+                e.get_points()->update(n_points);
+                e.get_life_manager()->set_n_lives(n_lives);
+                d.initilize_textures(e.get_board());
+                e.get_ai()->move_all(&d, e.get_state_manager(), e.get_speed_manager());
+            }
             d.draw_lives(e.get_life_manager()->get_n_lives());
         }
         else if (game_state == game_states::EDITING)
@@ -592,6 +666,7 @@ int main()
             d.draw_inputs(selecting_size_body_input_list.get_inputs(), selecting_size_body_input_list.get_selected(), texture_surfaces::BODY);
         }
 
+        d.draw_alert(e.get_alert());
         d.draw_all();
     }
 

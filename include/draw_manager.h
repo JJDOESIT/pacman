@@ -19,6 +19,7 @@
 #include "json.h"
 #include "button.h"
 #include "input.h"
+#include "alert.h"
 
 #include <iostream>
 #include <string>
@@ -65,6 +66,8 @@ public:
     void draw_inputs(std::vector<Input *> *inputs, int selected_input, int texture_surface);
 
     void draw_lives(int n_pacman_lives);
+
+    void draw_alert(Alert *alert);
 
     void clear_all();
     void draw_all();

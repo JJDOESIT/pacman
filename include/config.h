@@ -43,6 +43,7 @@ public:
     static inline std::string FONT_DIR = "fonts/";
 
     static void read(std::string config_path);
+    static void scan(std::string line, std::string &key, std::string &value, char delimiter);
 };
 
 #endif

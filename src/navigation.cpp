@@ -230,6 +230,7 @@ void Navigation::move_occupant(Draw_Manager *draw_manager, Occupant *occupant, B
             {
                 coin->set_toggled(false);
                 points->update(10);
+                points->decreament_coins();
                 draw_manager->set_texture(*coin->get_cell(), coin->get_type(), 0, false);
             }
         }
@@ -242,7 +243,7 @@ void Navigation::move_occupant(Draw_Manager *draw_manager, Occupant *occupant, B
                 if (power->get_type() == power_types::POWER_PELLET)
                 {
                     power->set_toggled(false);
-                    points->update(200);
+                    points->update(50);
                     *powerup = power_types::POWER_PELLET;
                     draw_manager->set_texture(*power->get_cell(), type::POWER, static_cast<Power *>(power)->get_type(), false);
                 }
