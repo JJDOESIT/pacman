@@ -97,19 +97,18 @@ float Map_Editor::get_mouse_position(int number, int cell_width, int offset)
 }
 
 // Initilize default config file
-void Map_Editor::create_config_file(int map_count)
+void Map_Editor::create_config_file(std::string name)
 {
     rapidjson::Document *document = Json::get_document(Config::JSON_DIR + "default_config.json");
     rapidjson::Value *config_list = Json::get_object(document, "config");
 
     // Create a new file
-    std::ofstream ofstream("config/config" + std::to_string(map_count) + ".txt");
+    std::ofstream ofstream("config/" + name + ".txt");
 
     // Check if the file was created
     if (!ofstream)
     {
         std::cout << "Error: Cannot create file ..." << std::endl;
-        exit(1);
     }
 
     int int_value;
@@ -192,7 +191,6 @@ void Map_Editor::array_to_file()
     // Increament the map count by one and create a config file
     if (open_map.length() == 0)
     {
-        create_config_file(map_count);
         Json::add_int_to_array(Config::JSON_DIR + "map_count.json", document, value, map_count);
         Json::set_int(Config::JSON_DIR + "map_count.json", "count", Json::get_int(Config::JSON_DIR + "map_count.json", "count") + 1);
     }
@@ -591,6 +589,7 @@ void Map_Editor::add_tile(Draw_Manager *draw_manager, float x, float y)
 // Return a new vector containing all files in the MAP_DIR
 std::vector<std::string> *Map_Editor::map_files()
 {
+    map_names.clear();
     for (const auto &entry : std::filesystem::directory_iterator(Config::MAP_DIR))
     {
         map_names.push_back(entry.path().filename().string());
@@ -598,16 +597,21 @@ std::vector<std::string> *Map_Editor::map_files()
     return &map_names;
 }
 
+// Return a new vector containing all files in the config dir
+std::vector<std::string> *Map_Editor::config_files()
+{
+    config_names.clear();
+    for (const auto &entry : std::filesystem::directory_iterator("config/"))
+    {
+        config_names.push_back(entry.path().filename().string());
+    }
+    return &config_names;
+}
+
 // Return the selected tile
 int Map_Editor::get_selected_tile()
 {
     return selected_tile;
-}
-
-// Clear the map files vector
-void Map_Editor::clear_map_files()
-{
-    map_names.clear();
 }
 
 // Clear the map board

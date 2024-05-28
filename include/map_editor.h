@@ -32,14 +32,15 @@ private:
     void add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type = 0, bool toggled = true);
     float get_mouse_position(int number, int cell_width, int offset = 0);
 
-    void create_config_file(int map_count);
     std::vector<std::string> map_names;
+    std::vector<std::string> config_names;
 
     int selected_tile;
     void reset_selected_tile();
 
 public:
     void create_map(int n_rows, int n_cols);
+    void create_config_file(std::string name);
     Board *get_board();
     void array_to_file();
     void file_to_array(std::string map_name);
@@ -51,6 +52,7 @@ public:
     int get_selected_tile();
     void add_tile(Draw_Manager *draw_manager, float x, float y);
     std::vector<std::string> *map_files();
+    std::vector<std::string> *config_files();
     void clear_map_files();
     void clear_board();
     int find_int_substring(std::string string);
