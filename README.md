@@ -21,3 +21,9 @@
     - Note: Neccesary changes to install location of SFML might be required in the makefile
     - Note: Reinstallation of <a href="https://github.com/Tencent/rapidjson">RapidJSON</a> in lib/ might be neccessary
 
+# Features
+
+This project features a fully playable Pacman game, as well as a fleshed out map editor and config editor to make the experience more customizable.
+
+
+
