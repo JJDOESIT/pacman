@@ -9,7 +9,7 @@
 2. Move the downloaded zip into a Linux environment
 3. Extract the files
 4. Run pacman.exe
-    * If permissions denied, run ```chmod 700 <path to pacman.exe>``` and try running again
+    * If permissions are denied, run ```chmod 700 <path to pacman.exe>``` and try running again
 
 
 
@@ -23,13 +23,12 @@
 
 # Features
 
-- This project features a fully playable Pacman game, as well as a fleshed out map editor and config editor to make the experience more customizable.
+- This project features a playable Pacman game, as well as a fleshed out map editor + config editor to make the experience more customizable.
    - Each ghost has two modes <b>(scatter and chase)</b>. While scattering, the ghosts will target a designated target tile. While chasing, each ghost will implement its own unique <b>AI algorithm</b> to chase Pacman.
         - <b>Blinky:</b> Targets Pacman directly
-        - <b>Pinky:</b> Targets four tiles ahead of Pacman's current direction
-        - <b>Inky:</b> Will target Pacman directly until within an 8 tile radius, where he will go back to scatter mode
-        - <b>Clyde:</b> Targets the doubled calculated vector between Blinky and Pacman's position
-<br>
+        - <b>Pinky:</b> Targets 4 tiles ahead of Pacman's current direction
+        - <b>Inky:</b> Targets Pacman directly until he is within an 8-tile radius, then switch back to scatter mode
+        - <b>Clyde:</b> Targets the vector that is twice the distance between Blinky's position and Pacman's position
 - Using WASD, the player can move Pacman throughout the map\
    <img src="https://github.com/JJDOESIT/pacman/assets/138625553/357a207d-e6d3-4e00-b956-1b3fe970f55f" width="400">
 
