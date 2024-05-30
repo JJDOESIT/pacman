@@ -19,4 +19,5 @@
 2.  Install the requirements: ```sudo apt-get install libsfml-dev``` and ```sudo apt-get install build-essential```
 3. Run the makefile in command shell or IDE terminal
     - Note: Neccesary changes to install location of SFML might be required in the makefile
+    - Note: Reinstallation of <a href="https://github.com/Tencent/rapidjson">RapidJSON</a> in lib/ might be neccessary
 
