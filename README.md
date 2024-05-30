@@ -5,7 +5,7 @@
 <br>
 <b>Quick Install:</b>
 <br>
-1. Download latest <a href="https://github.com/JJDOESIT/chess/releases/tag/v1.0.0">pacman.zip</a> release for Linux
+1. Download latest <a href="https://github.com/JJDOESIT/pacman/releases/tag/v1.0.0">pacman.zip</a> release for Linux
 2. Move the downloaded zip into a Linux environment
 3. Extract the files
 4. Run pacman.exe
