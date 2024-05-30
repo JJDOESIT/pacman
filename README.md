@@ -41,11 +41,11 @@
    <img src="https://github.com/JJDOESIT/pacman/assets/138625553/4ca9f7ae-540e-4ad1-b539-6065b0c280df" width="300">
    <img src="https://github.com/JJDOESIT/pacman/assets/138625553/d2a8091a-00ad-4574-b2d5-3746af669e69" width="300">
 
-- Power pellets can be collected for points and to eat ghosts!\
+- Collect power pellets to earn points and eat ghosts!\
    <img src="https://github.com/JJDOESIT/pacman/assets/138625553/31a07626-63d4-40bb-8937-c83a737f56e9" width="300">
 
 - The config editor can be used to customize the difficulty and game settings
-  - Note: The ghost's escape tiles are applied based on where the gate(s) are placed. When creating custom maps, it is neccessary to assign each ghost to a gate (can be a many-to-one relationship or a one-to-one). This is because the ghost's AI algorithm utilizes the gates to know when they have entered or exited the den.
+   - Note: The ghost's escape tiles are determined by the placement of the gates. When creating custom maps, it is necessary to assign each ghost to a gate. This can be a one-to-one or many-to-one relationship. The ghost's AI algorithm uses these gates to determine when they have entered or exited the den.
    <img src="https://github.com/JJDOESIT/pacman/assets/138625553/6dd7332d-951f-4a08-81e0-0878603a4176" width="300">
    <img src="https://github.com/JJDOESIT/pacman/assets/138625553/350f27b4-ebe7-4e31-8390-d347a9178262" width="300">
 
