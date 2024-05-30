@@ -473,6 +473,18 @@ void Map_Editor::set_open_map(std::string m)
     open_map = m;
 }
 
+// Set the open config file
+void Map_Editor::set_open_config(std::string c)
+{
+    open_config_file = c;
+}
+
+// Return the open config file
+std::string Map_Editor::get_open_config()
+{
+    return open_config_file;
+}
+
 // Add a specific occupant to the board
 void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type, bool toggled)
 {

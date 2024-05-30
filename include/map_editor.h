@@ -28,6 +28,7 @@ private:
     std::vector<Portal *> portals;
     int portal_index;
     int n_in_tile_row;
+    std::string open_config_file;
 
     void add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type = 0, bool toggled = true);
     float get_mouse_position(int number, int cell_width, int offset = 0);
@@ -58,6 +59,8 @@ public:
     int find_int_substring(std::string string);
     std::string get_open_map();
     void set_open_map(std::string m);
+    void set_open_config(std::string c);
+    std::string get_open_config();
 };
 
 #endif

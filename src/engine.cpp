@@ -51,21 +51,24 @@ void Engine::initilize(std::string map_name)
 // Reset the game engine
 void Engine::reset()
 {
-    board.clear();
-    for (int character = 0; character < 5; character++)
+    if (initilized)
     {
-        characters[character] = nullptr;
+        board.clear();
+        for (int character = 0; character < 5; character++)
+        {
+            characters[character] = nullptr;
+        }
+        portals.clear();
+        points.reset();
+        state_manager->reset();
+        alert.reset();
+        delete life_manager;
+        delete state_manager;
+        delete navigation;
+        delete speed_manager;
+        delete ai;
+        initilized = false;
     }
-    portals.clear();
-    points.reset();
-    state_manager->reset();
-    alert.reset();
-    delete life_manager;
-    delete state_manager;
-    delete navigation;
-    delete speed_manager;
-    delete ai;
-    initilized = false;
 }
 
 // Fill the board array from the given text file

@@ -50,9 +50,11 @@ int main()
     Buttons selecting_config_name_footer_button_list;
     Buttons playing_footer_button_list;
     Buttons loading_config_footer_button_list;
+    Buttons editing_config_footer_button_list;
 
     Inputs selecting_size_body_input_list;
     Inputs selecting_config_name_body_input_list;
+    Inputs editing_config_body_input_list;
 
     const int BUTTON_WIDTH = Config::SCREEN_WIDTH / 6;
     const int BUTTON_HEIGHT = Config::HEADER_HEIGHT / 2;
@@ -76,6 +78,8 @@ int main()
     playing_footer_button_list.push(new Button(Config::SCREEN_WIDTH - BUTTON_WIDTH - (BUTTON_WIDTH / 2), Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_CHAR_SIZE - 2, sf::Color(230, 230, 230), sf::Color::Black, "Create Config"));
     playing_footer_button_list.push(new Button(Config::SCREEN_WIDTH - (2 * BUTTON_WIDTH) - (BUTTON_WIDTH / 2) - 10, Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_CHAR_SIZE - 2, sf::Color(230, 230, 230), sf::Color::Black, "Load Config"));
     loading_config_footer_button_list.push(new Button(Config::SCREEN_WIDTH - (2 * BUTTON_WIDTH) - (BUTTON_WIDTH / 2) - 10, Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_CHAR_SIZE, sf::Color(248, 215, 218), sf::Color(114, 28, 36), "Exit"));
+    editing_config_footer_button_list.push(new Button(Config::SCREEN_WIDTH - BUTTON_WIDTH - (BUTTON_WIDTH / 2), Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_CHAR_SIZE, sf::Color(217, 237, 218), sf::Color(21, 87, 36), "Save"));
+    editing_config_footer_button_list.push(new Button(Config::SCREEN_WIDTH - (2 * BUTTON_WIDTH) - (BUTTON_WIDTH / 2) - 10, Config::HEADER_HEIGHT - BUTTON_HEIGHT - (BUTTON_HEIGHT / 2), BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_CHAR_SIZE, sf::Color(248, 215, 218), sf::Color(114, 28, 36), "Exit"));
 
     selecting_size_body_input_list.push(new Input((Config::SCREEN_WIDTH / 2) - (INPUT_WIDTH / 2), 0, INPUT_WIDTH, INPUT_HEIGHT, 30, sf::Color::White, sf::Color::Black, sf::Color::White, "Rows: "));
     selecting_size_body_input_list.push(new Input((Config::SCREEN_WIDTH / 2) - (INPUT_WIDTH / 2), INPUT_HEIGHT + 10, INPUT_WIDTH, INPUT_HEIGHT, 30, sf::Color::White, sf::Color::Black, sf::Color::White, "Columns: "));
@@ -145,6 +149,30 @@ int main()
                                                                     e.reset();
                                                                     game_state = game_states::NO_MAP; });
 
+    // Assign the exit function
+    (*editing_config_footer_button_list.get_buttons())[1]->set_function([&e, &game_state]()
+                                                                        { 
+                                                                    e.reset();
+                                                                    game_state = game_states::NO_MAP; });
+
+    // Assign the save function
+    (*editing_config_footer_button_list.get_buttons())[0]->set_function([&e, &game_state, &editing_config_body_input_list]()
+                                                                        { 
+                                                                        // Open the config file
+                                                                        std::ofstream ofstream("config/" + e.get_map_editor()->get_open_config());
+
+                                                                        // Check if the file was opened
+                                                                        if (!ofstream)
+                                                                        {
+                                                                            std::cout << "Error: Cannot open file ..." << std::endl;
+                                                                        }
+
+                                                                        for (auto input: *editing_config_body_input_list.get_inputs()){
+                                                                            ofstream << input->get_label_text()->getString().toAnsiString() << "=" << input->get_text()->getString().toAnsiString() << "\n";
+                                                                        }
+                                                                        ofstream.close();
+                                                                        game_state = game_states::NO_MAP; });
+
     // Assign the create function config
     (*selecting_config_name_footer_button_list.get_buttons())[1]->set_function([&e, &game_state, &selecting_config_name_body_input_list, &d]()
                                                                                { 
@@ -181,6 +209,7 @@ int main()
                                                                         loading_map_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) - (MAP_BUTTON_WIDTH / 2)) - BUTTON_WIDTH, ((m / 3) * MAP_BUTTON_HEIGHT) + ((m / 3) * 5), MAP_BUTTON_WIDTH, MAP_BUTTON_HEIGHT, 20, background_color, sf::Color::Black, (*maps)[m / 3]));
                                                                         loading_map_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) + (MAP_BUTTON_WIDTH / 2)) - BUTTON_WIDTH, ((m / 3)* MAP_BUTTON_HEIGHT) + ((m / 3) * 5), BUTTON_WIDTH, MAP_BUTTON_HEIGHT, 20, sf::Color(0,150,0), sf::Color::White, "Edit"));
                                                                         loading_map_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) + (MAP_BUTTON_WIDTH / 2)), ((m / 3)* MAP_BUTTON_HEIGHT) + ((m / 3) * 5), BUTTON_WIDTH, MAP_BUTTON_HEIGHT, 20, sf::Color::Red, sf::Color::White, "Delete"));
+
                                                                         // Assign the load function
                                                                         (*loading_map_body_button_list.get_buttons())[m]->set_function([&game_state, &e, &d, &buffer_direction, &intended_direction, maps, m, &loading_map_body_button_list]()
                                                                         {                        
@@ -216,7 +245,7 @@ int main()
                                                                         });
                                                                     } });
 
-    (*playing_footer_button_list.get_buttons())[1]->set_function([&game_state, &e, &loading_config_body_button_list, &d, &MAP_BUTTON_WIDTH, &BUTTON_HEIGHT, &BUTTON_WIDTH, &MAP_BUTTON_HEIGHT]()
+    (*playing_footer_button_list.get_buttons())[1]->set_function([&game_state, &e, &loading_config_body_button_list, &editing_config_body_input_list, &d, &MAP_BUTTON_WIDTH, &BUTTON_HEIGHT, &BUTTON_WIDTH, &MAP_BUTTON_HEIGHT, &INPUT_WIDTH, &INPUT_HEIGHT]()
                                                                  { game_state = game_states::LOADING_CONFIG; 
                                                                  std::vector<std::string> *configs = e.get_map_editor()->config_files(); 
                                                                  loading_config_body_button_list.clear();
@@ -228,14 +257,42 @@ int main()
                                                                         loading_config_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) + (MAP_BUTTON_WIDTH / 2)) - BUTTON_WIDTH, ((m / 3)* MAP_BUTTON_HEIGHT) + ((m / 3) * 5), BUTTON_WIDTH, MAP_BUTTON_HEIGHT, 20, sf::Color(0,150,0), sf::Color::White, "Edit"));
                                                                         loading_config_body_button_list.push(new Button(((Config::SCREEN_WIDTH / 2) + (MAP_BUTTON_WIDTH / 2)), ((m / 3)* MAP_BUTTON_HEIGHT) + ((m / 3) * 5), BUTTON_WIDTH, MAP_BUTTON_HEIGHT, 20, sf::Color::Red, sf::Color::White, "Delete"));
 
+                                                                        // Assign the load function
+                                                                        (*loading_config_body_button_list.get_buttons())[m]->set_function([&game_state, &e, &d, configs, m, &loading_config_body_button_list]()
+                                                                        {                        
+                                                                            Config::read("config/" + (*configs)[m / 3]);
+                                                                            game_state = game_states::NO_MAP;
+                                                                        });
+
+                                                                        // Assign the edit function 
+                                                                        (*loading_config_body_button_list.get_buttons())[m + 1]->set_function([configs, m, &game_state, &d, &e, &editing_config_body_input_list, &INPUT_WIDTH, &INPUT_HEIGHT]()
+                                                                        {  
+                                                                            editing_config_body_input_list.clear();
+                                                                            editing_config_body_input_list.set_selected(-1);
+                                                                            std::vector<std::vector<std::string>> *string_config = Config::string_formatted_config("config/" + (*configs)[m / 3]);
+                                                                            string_config->pop_back();
+                                                                            int count = 0;
+                                                                            for (auto config: *string_config){
+                                                                                editing_config_body_input_list.push(new Input((Config::SCREEN_WIDTH / 2), (INPUT_HEIGHT / 2) * count + (count * 5), INPUT_WIDTH, (INPUT_HEIGHT / 2), 15, sf::Color::White, sf::Color::Black, sf::Color::White, config[0]));
+                                                                                (*editing_config_body_input_list.get_inputs())[count]->update_text(config[1]);
+                                                                                count += 1;
+                                                                            }
+                                                                            e.get_map_editor()->set_open_config((*configs)[m / 3]);
+                                                                            game_state = game_states::EDITING_CONFIG;
+                                                                            delete string_config;
+                                                                        });
+
                                                                         // Assign the delete function
                                                                         (*loading_config_body_button_list.get_buttons())[m + 2]->set_function([configs, m, &game_state, &e]()
                                                                         {  
-                                                                            int count = e.get_map_editor()->find_int_substring(Config::MAP_DIR + (*configs)[m / 3]);
                                                                             std::remove(("config/" + (*configs)[m / 3]).c_str());
                                                                             Json::set_int(Config::JSON_DIR + "default_config.json", "count", Json::get_int(Config::JSON_DIR + "default_config.json", "count") - 1);
                                                                             game_state = game_states::NO_MAP;
                                                                         });
+
+
+
+
                                                                 } });
 
     while (window.isOpen())
@@ -423,7 +480,7 @@ int main()
                         {
                             (*selecting_size_body_input_list.get_inputs())[selected]->delete_character();
                         }
-                        // If the input is a number and less than 4 characters
+                        // If the input is a number and less than 2 characters
                         else if (event.text.unicode >= 48 && event.text.unicode <= 57 && (*selecting_size_body_input_list.get_inputs())[selected]->get_length_of_text() < 2)
                         {
                             (*selecting_size_body_input_list.get_inputs())[selected]->update_text(event.text.unicode);
@@ -444,6 +501,23 @@ int main()
                         else if ((event.text.unicode >= 48 && event.text.unicode <= 57 || event.text.unicode >= 97 && event.text.unicode <= 122 || event.text.unicode >= 65 && event.text.unicode <= 90) && (*selecting_config_name_body_input_list.get_inputs())[selected]->get_length_of_text() < 8)
                         {
                             (*selecting_config_name_body_input_list.get_inputs())[selected]->update_text(event.text.unicode);
+                        }
+                    }
+                }
+                else if (game_state == game_states::EDITING_CONFIG)
+                {
+                    int selected = editing_config_body_input_list.get_selected();
+                    if (selected != -1)
+                    {
+                        // If the number is a backspace and input is not empty
+                        if (event.text.unicode == '\b' && (*editing_config_body_input_list.get_inputs())[selected]->get_length_of_text() > 0)
+                        {
+                            (*editing_config_body_input_list.get_inputs())[selected]->delete_character();
+                        }
+                        // If the input is a number or a comma and less than 5 characters
+                        else if (((event.text.unicode >= 48 && event.text.unicode <= 57) || event.text.unicode == 44) && (*editing_config_body_input_list.get_inputs())[selected]->get_length_of_text() < 5)
+                        {
+                            (*editing_config_body_input_list.get_inputs())[selected]->update_text(event.text.unicode);
                         }
                     }
                 }
@@ -599,6 +673,27 @@ int main()
                         if ((*loading_config_body_button_list.get_buttons())[b]->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
                         {
                             (*loading_config_body_button_list.get_buttons())[b]->run_function();
+                        }
+                    }
+                }
+
+                else if (game_state == game_states::EDITING_CONFIG)
+                {
+                    y -= Config::HEADER_HEIGHT;
+                    for (int i = 0; i < (*editing_config_body_input_list.get_inputs()).size(); i++)
+                    {
+                        if ((*editing_config_body_input_list.get_inputs())[i]->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
+                        {
+                            editing_config_body_input_list.set_selected(i);
+                        }
+                    }
+
+                    y -= Config::BODY_HEIGHT;
+                    for (int b = 0; b < (*editing_config_footer_button_list.get_buttons()).size(); b++)
+                    {
+                        if ((*editing_config_footer_button_list.get_buttons())[b]->get_cell()->getGlobalBounds().contains(sf::Vector2f(x, y)))
+                        {
+                            (*editing_config_footer_button_list.get_buttons())[b]->run_function();
                         }
                     }
                 }
@@ -776,6 +871,11 @@ int main()
         {
             d.draw_buttons(selecting_config_name_footer_button_list.get_buttons(), texture_surfaces::FOOTER);
             d.draw_inputs(selecting_config_name_body_input_list.get_inputs(), selecting_config_name_body_input_list.get_selected(), texture_surfaces::BODY);
+        }
+        else if (game_state == game_states::EDITING_CONFIG)
+        {
+            d.draw_inputs(editing_config_body_input_list.get_inputs(), editing_config_body_input_list.get_selected(), texture_surfaces::BODY);
+            d.draw_buttons(editing_config_footer_button_list.get_buttons(), texture_surfaces::FOOTER);
         }
 
         d.draw_alert(e.get_alert());

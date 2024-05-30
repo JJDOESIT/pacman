@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 class Config
 {
@@ -43,7 +44,9 @@ public:
     static inline std::string FONT_DIR = "fonts/";
 
     static void read(std::string config_path);
+    static void insert(std::string key, std::string value);
     static void scan(std::string line, std::string &key, std::string &value, char delimiter);
+    static std::vector<std::vector<std::string>> *string_formatted_config(std::string file_name);
 };
 
 #endif
