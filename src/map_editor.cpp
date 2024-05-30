@@ -485,6 +485,14 @@ std::string Map_Editor::get_open_config()
     return open_config_file;
 }
 
+// Return whether the string ends in a value
+bool Map_Editor::ends_with(std::string const &value, std::string const &ending)
+{
+    if (ending.size() > value.size())
+        return false;
+    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
 // Add a specific occupant to the board
 void Map_Editor::add(Draw_Manager *draw_manager, int row, int col, int type, int specific_type, bool toggled)
 {
@@ -604,7 +612,10 @@ std::vector<std::string> *Map_Editor::map_files()
     map_names.clear();
     for (const auto &entry : std::filesystem::directory_iterator(Config::MAP_DIR))
     {
-        map_names.push_back(entry.path().filename().string());
+        if (ends_with(entry.path().filename().string(), ".txt"))
+        {
+            map_names.push_back(entry.path().filename().string());
+        }
     }
     return &map_names;
 }
@@ -615,7 +626,10 @@ std::vector<std::string> *Map_Editor::config_files()
     config_names.clear();
     for (const auto &entry : std::filesystem::directory_iterator("config/"))
     {
-        config_names.push_back(entry.path().filename().string());
+        if (ends_with(entry.path().filename().string(), ".txt"))
+        {
+            config_names.push_back(entry.path().filename().string());
+        }
     }
     return &config_names;
 }

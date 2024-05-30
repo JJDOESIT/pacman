@@ -61,6 +61,7 @@ public:
     void set_open_map(std::string m);
     void set_open_config(std::string c);
     std::string get_open_config();
+    bool ends_with(std::string const &value, std::string const &ending);
 };
 
 #endif
