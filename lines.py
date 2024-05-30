@@ -15,9 +15,7 @@ def count_lines_of_code(directories):
                             if line.strip() == "":
                                 total_lines -= 1
                             if "//" in line or "/*" in line or "*/" in line:
-                                total_lines -= 1
-
-                    
+                                total_lines -= 1                 
 
     return total_lines
 
