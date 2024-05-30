@@ -10,7 +10,7 @@ DNAMES = $(SRCNAMES:.cpp=.d)
 OBJS = $(addprefix build/,$(OBJNAMES))
 DFILES = $(addprefix build/,$(DNAMES))
 
-TARGET = pacman
+TARGET = pacman.exe
 
 all: $(TARGET)
 

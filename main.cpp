@@ -17,7 +17,7 @@ int main()
 
     int game_state = game_states::NO_MAP;
 
-    sf::RenderWindow window(sf::VideoMode(Config::SCREEN_WIDTH, Config::HEADER_HEIGHT + Config::BODY_HEIGHT + Config::FOOTER_HEIGHT), "Pac-Man");
+    sf::RenderWindow window(sf::VideoMode(Config::SCREEN_WIDTH, Config::HEADER_HEIGHT + Config::BODY_HEIGHT + Config::FOOTER_HEIGHT), "Pac-Man", sf::Style::Titlebar | sf::Style::Close);
     sf::RenderTexture body;
     sf::RenderTexture header;
     sf::RenderTexture footer;
@@ -468,6 +468,11 @@ int main()
             {
                 window.close();
             }
+            if (event.type == sf::Event::Resized)
+            {
+                window.setSize(sf::Vector2u(Config::SCREEN_WIDTH, Config::HEADER_HEIGHT + Config::BODY_HEIGHT + Config::FOOTER_HEIGHT));
+            }
+
             if (event.type == sf::Event::TextEntered)
             {
                 if (game_state == game_states::SELECTING_SIZE)
