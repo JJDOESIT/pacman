@@ -5,7 +5,7 @@
 <br>
 <b>Quick Install:</b>
 <br>
-1. Download the latest <a href="https://github.com/JJDOESIT/pacman/releases/tag/v1.0.0">pacman.zip</a> release for Windows or Linux
+1. Download the latest <b><a href="https://github.com/JJDOESIT/pacman/releases/tag/v1.0.0">pacman.zip</a></b> release for Windows or Linux
 3. Extract the files
 4. Run pacman.exe
     * If permissions are denied, run ```chmod 700 <path to pacman.exe>``` and try running again
@@ -18,7 +18,7 @@
 2.  Install the requirements: ```sudo apt-get install libsfml-dev``` and ```sudo apt-get install build-essential```
 3. Run the makefile in command shell or IDE terminal
     - Note: Neccesary changes to install location of SFML might be required in the makefile
-    - Note: Reinstallation of <a href="https://github.com/Tencent/rapidjson">RapidJSON</a> in lib/ might be neccessary
+    - Note: Reinstallation of <b><a href="https://github.com/Tencent/rapidjson">RapidJSON</a></b> in lib/ might be neccessary
 
 # Features
 
